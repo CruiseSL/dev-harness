@@ -66,8 +66,8 @@ After both approvals:
 
 1. Generate `YYYYMMDD_shortname` and run full-ID, short-name, directory, and registry collision checks.
 2. Create missing management paths from `templates/architect/tracks.md` and add `templates/architect/management-section.md` to `architect/index.md` when absent.
-3. Create `architect/tracks/<track_id>/` from the approved spec and plan plus the metadata and index templates.
-4. Set metadata to `new`, timestamps to current UTC, and `schema_version` to `1`; remove `_template_notice` from the generated Track metadata.
+3. Create `architect/tracks/<track_id>/` from the approved spec and plan plus `templates/architect/metadata.md` and the Track index template.
+4. Write the fenced JSON as `metadata.json` without the fence, set status to `new`, timestamps to current UTC, and `schema_version` to `1`.
 5. Append exactly one pending registry entry from `templates/architect/registry-entry.md`.
 6. Validate artifact presence, ID consistency, safe links, and registry uniqueness.
 

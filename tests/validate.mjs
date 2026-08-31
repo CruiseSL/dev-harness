@@ -54,7 +54,7 @@ const required = [
   "templates/architect/discussion.md",
   "templates/architect/spec.md",
   "templates/architect/plan.md",
-  "templates/architect/metadata.json",
+  "templates/architect/metadata.md",
   "templates/architect/core-index.md",
   "templates/architect/management-section.md",
   "templates/architect/tracks.md",
@@ -127,10 +127,13 @@ const registry = read("templates/architect/registry-entry.md");
 assert(/- \[ \] \*\*Track: <Track Description>\*\*/.test(registry), "Registry template must contain one pending marker");
 assert(/\.\/tracks\/<track_id>\//.test(registry), "Registry template must contain a safe relative Track link");
 
-const metadataTemplate = JSON.parse(read("templates/architect/metadata.json"));
+const metadataDocument = read("templates/architect/metadata.md");
+const metadataMatch = metadataDocument.match(/```json\n([\s\S]+?)\n```/);
+assert(metadataMatch, "Metadata template must contain one fenced JSON object");
+const metadataTemplate = JSON.parse(metadataMatch[1]);
 assert(metadataTemplate.schema_version === 1, "Metadata template must declare schema version 1");
 assert(metadataTemplate.status === "new", "Metadata template must begin in new state");
-assert(metadataTemplate._template_notice?.includes("hlhr202/swe-skills"), "Metadata template must carry a modified-file notice");
+assert(metadataDocument.includes("Modified from hlhr202/swe-skills"), "Metadata template must carry a modified-file notice");
 
 for (const path of [
   "templates/architect/discussion.md",
