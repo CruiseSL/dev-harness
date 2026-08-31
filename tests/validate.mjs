@@ -6,6 +6,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name === ".git") return [];
     const path = join(directory, entry.name);
     return entry.isDirectory() ? walk(path) : [path];
   });
