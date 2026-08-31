@@ -25,7 +25,7 @@ Use these minimal scenarios as a maintenance check for classification, stage sta
 3. Coordinator authorizes one fix: reserve parent `1/1`; fix Work Order starts corrective `0/1`.
 4. Fix changes only the accessible name and passes: corrective remains `0/1`.
 5. Final review sees a pre-existing tooltip not covered by acceptance: classify Pre-existing and omit unless materially useful.
-6. Terminal workflow state: `accepted`. No further fix may be authorized because parent budget is `1/1`.
+6. Terminal harness state: `accepted`. No further fix may be authorized because parent budget is `1/1`.
 
 ## Scoped: CLI Dry Run
 
@@ -39,7 +39,7 @@ Use these minimal scenarios as a maintenance check for classification, stage sta
 2. Review finds a ledger write: Blocking. Authorize fix 1 and reserve parent `1/2`; fix passes with corrective `0/1`.
 3. Cumulative review finds retry-queue mutation: Blocking. Authorize fix 2 and reserve parent `2/2`; fix passes with corrective `0/1`.
 4. Final review notes missing dry-run metrics, which are outside scope and acceptance: Out-of-scope, not a fix.
-5. Terminal workflow state: `accepted` at `2/2`.
+5. Terminal harness state: `accepted` at `2/2`.
 6. If final review instead finds another Blocking defect, terminal state is `blocked`; a third fix Work Order is not authorized.
 
 ## Track: Non-Null Recipient Migration Preflight

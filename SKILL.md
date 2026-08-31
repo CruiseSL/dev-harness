@@ -1,6 +1,6 @@
 ---
 name: dev-harness
-description: Run a bounded main-session and worker-session software development workflow. Use when implementing a coding change that needs task sizing, delegated execution, model routing, scope control, review, or Architect escalation.
+description: Run a bounded main-session and worker-session software development harness. Use when implementing a coding change that needs task sizing, delegated execution, model routing, scope control, review, or Architect escalation.
 license: MIT
 ---
 
@@ -48,9 +48,9 @@ Coordinate software changes without turning small requests into heavyweight proj
 - `accepted`: Acceptance criteria pass, required validation passes, scope is clean, and no Blocking finding remains.
 - `blocked`: A material decision, missing capability, unsafe action, or persistent required-check failure needs the Coordinator or user.
 - `partial`: Authorized work is useful but one or more acceptance criteria remain unmet; do not describe it as complete.
-- `cancelled`: The user stops the workflow or rejects the required scope or approval.
+- `cancelled`: The user stops the run or rejects the required scope or approval.
 
-Executor `completed` and Reviewer `changes-required` are stage states, not workflow terminal states. Only the Coordinator returns a workflow terminal state after review.
+Executor `completed` and Reviewer `changes-required` are stage states, not harness terminal states. Only the Coordinator returns a harness terminal state after review.
 
 Stop immediately when the next action would exceed the Work Order, consume another fix cycle beyond budget, modify unrelated user work, require an unapproved destructive or external action, or turn a new independent issue into part of the current request.
 

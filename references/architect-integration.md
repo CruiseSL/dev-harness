@@ -10,7 +10,7 @@ When Architect context is active:
 
 1. Approved `spec.md` defines durable outcome and non-goals.
 2. Approved `plan.md` defines ordered implementation scope and lifecycle.
-3. Architect workflow and status rules own track state, documentation synchronization, approvals, commits, and cleanup.
+3. Architect lifecycle and status rules own track state, documentation synchronization, approvals, commits, and cleanup.
 4. Dev Harness owns delegation shape, self-contained Work Orders, minimal implementation, validation budget, finding classification, and per-slice stop conditions unless they conflict with Architect.
 
 Architect wins for durable scope, approvals, lifecycle state, commits, and cleanup. The selected implementation controller owns execution continuation and budgets. Do not duplicate or independently rewrite Architect status in Dev Harness documents.
@@ -40,12 +40,12 @@ Use Architect review for final Track readiness. Dev Harness review may still gat
 
 ## Entry and Exit
 
-Enter Track mode only for the criteria in `classification.md`. If Architect is installed but core context or an approved track is missing, stop and route through the applicable Architect setup, discussion, or proposal workflow. Do not invent partial track artifacts.
+Enter Track mode only for the criteria in `classification.md`. If Architect is installed but core context or an approved track is missing, stop and route through the applicable Architect setup, discussion, or proposal process. Do not invent partial track artifacts.
 
 If Architect is unavailable, report that durable Track management is unavailable and ask whether to:
 
 - Continue as explicitly bounded Scoped Work Orders with no durable Track state.
-- Pause until a compatible project-context workflow is installed.
+- Pause until a compatible project-context integration is installed.
 
 Do not silently downgrade migration, security, data-integrity, public-contract, or irreversible work to Scoped.
 

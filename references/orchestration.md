@@ -7,7 +7,7 @@ Define Dev Harness coordination, implementation, and review roles while remainin
 ## Roles
 
 - **Coordinator:** Clarifies the outcome, classifies work, writes the Work Order, selects capabilities, reviews results, approves fixes, and owns the final answer.
-- **Executor:** Implements one Work Order and returns evidence. It does not own requirements or workflow escalation.
+- **Executor:** Implements one Work Order and returns evidence. It does not own requirements or process escalation.
 - **Reviewer:** Compares the Work Order, diff, and validation evidence. It reports findings but does not edit without a new approved Work Order.
 
 The Coordinator may also act as Reviewer. Prefer role separation over spawning another reviewer for Quick work.
@@ -70,7 +70,7 @@ Executor result -> Reviewer accepted|changes-required|blocked|partial
 Reviewer decision -> Coordinator accepted|blocked|partial|cancelled
 ```
 
-Executor `completed` means the implementation stage claims its acceptance and checks are complete. It does not bypass review or equal workflow `accepted`.
+Executor `completed` means the implementation stage claims its acceptance and checks are complete. It does not bypass review or equal harness `accepted`.
 
 ## Handoff Contract
 
@@ -82,4 +82,4 @@ The dispatch message contains:
 4. The required Executor Result format.
 5. An instruction to stop and report rather than infer missing product decisions.
 
-When a fix is approved, reserve one parent review-fix cycle before dispatch and create a new Work Order limited to named findings. The reserved cycle remains consumed if dispatch or implementation fails. A fix Work Order gets one corrective cycle and does not reset the parent workflow's review-fix count. Do not tell the Executor to generally improve, clean up, harden, or address anything else it notices.
+When a fix is approved, reserve one parent review-fix cycle before dispatch and create a new Work Order limited to named findings. The reserved cycle remains consumed if dispatch or implementation fails. A fix Work Order gets one corrective cycle and does not reset the parent run's review-fix count. Do not tell the Executor to generally improve, clean up, harden, or address anything else it notices.

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Select the minimum workflow weight from risk, uncertainty, reversibility, and coordination needs. File count and estimated code size are supporting signals, not the deciding factors.
+Select the minimum process weight from risk, uncertainty, reversibility, and coordination needs. File count and estimated code size are supporting signals, not the deciding factors.
 
 ## Classification Dimensions
 
@@ -49,7 +49,7 @@ Track defaults:
 
 - One durable Architect track for the initiative.
 - Multiple bounded Work Orders mapped to approved plan slices.
-- Each Dev Harness controlled slice keeps the Scoped two-cycle limit. Architect controlled work uses its active workflow budget.
+- Each Dev Harness controlled slice keeps the Scoped two-cycle limit. Architect controlled work uses its active execution budget.
 - Architect owns durable specification, plan, status, and project-context synchronization.
 
 ## Decision Rule
