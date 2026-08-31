@@ -2,57 +2,82 @@
 
 ## Purpose
 
-Use these minimal scenarios as a maintenance check for classification, stage states, stop conditions, and budget accounting. Do not load them during ordinary implementation.
+Use these maintenance scenarios to test routing, artifact contracts, approvals, controller ownership, and budget accounting. Do not load them during ordinary delivery.
 
-## Shared Budget Semantics
+## Core Invariants
 
+- Exactly one registered Skill exists: `dev-harness`.
+- Architect modules are internal references, not separate `SKILL.md` files.
+- The user never chooses an internal module or implementation controller.
 - Initial implementation and first validation are attempt zero.
 - A corrective cycle is consumed only by a re-edit after required validation fails.
-- A parent review-fix cycle is reserved when the Coordinator authorizes a fix, before dispatch.
-- Every review fix Work Order has one corrective cycle and never resets the parent count.
-- Post-fix review uses the cumulative diff and original acceptance criteria.
+- A review-fix cycle is reserved before an authorized fix and never reset by redispatch.
+- Auto Mode controls continuation, not commits or destructive actions.
 
-## Quick: Retry Button Label
+## Quick: Accessible Label
 
-**Task:** Change one local Retry button's visible text and accessible name from `Retry now` to `Retry sync`. Own only the component and focused test. Do not change behavior or refactor.
+**Request:** Change one local Retry button's visible text and accessible name. Behavior and cause are clear.
 
-**Validation:** Run the focused component test. Initial corrective budget `0/1`; parent review-fix `0/1`.
-
-**Simulation:**
-
-1. Initial execution changes visible text and passes the focused test: Executor `completed`, corrective `0/1`, parent `0/1`.
-2. Review finds the explicit `aria-label` still says `Retry now`: Blocking, `changes-required`.
-3. Coordinator authorizes one fix: reserve parent `1/1`; fix Work Order starts corrective `0/1`.
-4. Fix changes only the accessible name and passes: corrective remains `0/1`.
-5. Final review sees a pre-existing tooltip not covered by acceptance: classify Pre-existing and omit unless materially useful.
-6. Terminal harness state: `accepted`. No further fix may be authorized because parent budget is `1/1`.
+**Expected:** Quick; no Architect artifacts. Focused test passes. Review catches any visible/accessibility mismatch. Maximum one corrective and one review-fix cycle.
 
 ## Scoped: CLI Dry Run
 
-**Task:** Add `--dry-run` across a CLI parser and service. With the flag, perform no external send, send-ledger write, or retry-queue mutation and print a summary. Without it, preserve behavior. Own the parser, service, and focused tests.
+**Request:** Add `--dry-run` across a parser and one service so external mutation is skipped and a summary is printed.
 
-**Validation:** Run focused parser and service tests plus typecheck. Initial corrective budget `0/2`; parent review-fix `0/2`.
+**Expected:** Scoped when internal contracts remain unchanged. One bounded Work Order owns parser, service, and focused tests. Maximum two corrective and two review-fix cycles. A public API or persistence change escalates before implementation.
 
-**Simulation:**
+## Track: Clear Durable Migration
 
-1. Initial result passes required checks: Executor `completed`, corrective `0/2`, parent `0/2`.
-2. Review finds a ledger write: Blocking. Authorize fix 1 and reserve parent `1/2`; fix passes with corrective `0/1`.
-3. Cumulative review finds retry-queue mutation: Blocking. Authorize fix 2 and reserve parent `2/2`; fix passes with corrective `0/1`.
-4. Final review notes missing dry-run metrics, which are outside scope and acceptance: Out-of-scope, not a fix.
-5. Terminal harness state: `accepted` at `2/2`.
-6. If final review instead finds another Blocking defect, terminal state is `blocked`; a third fix Work Order is not authorized.
+**Request:** Implement a staged persisted-schema migration with explicit target behavior, rollout, and rollback requirements.
 
-## Track: Non-Null Recipient Migration Preflight
+**Expected route:** Setup when core is absent, skip Discuss because direction is established, Propose with separate spec and plan approvals, then Implement after mode selection. Each plan unit is a bounded Work Order. No controller choice is shown.
 
-**Task:** Under an approved Architect track to make persisted `recipient_id` non-null, run slice 1 as a read-only diagnostic that reports null rows. Migration, backfill, deletion, rejection policy, and schema changes are out of scope for this slice.
+## Track: Ambiguous Data Ownership
 
-**Validation:** Run the focused diagnostic check. Initial corrective budget `0/2`; parent review-fix `0/2`. Use Dev Harness controlled implementation for this simulation.
+**Request:** Add cross-service synchronization without stating the source of truth or consistency model.
 
-**Simulation:**
+**Expected route:** Discuss automatically. It asks the material ownership decision, compares viable options, and synthesizes only after readiness. It creates no Track. When the originating request includes planning or implementation, it routes to Propose after synthesis without asking which Skill to use.
 
-1. Track and slice are `in_progress`; the Executor reports real null rows without mutation.
-2. Because slice acceptance is detection and reporting, Executor is `completed` and review is `accepted`; both budgets remain `0/2`.
-3. Backfill versus rejection is a scope-changing product/data decision for a later slice.
-4. Stop before dispatching that slice. The Track remains `in_progress`; the current run is `blocked` pending the decision.
-5. Completing the diagnostic Work Order does not complete the Track and consumes no review-fix cycle.
-6. If Architect controlled implementation was selected instead, use Architect continuation and budgets; do not claim this per-slice sequence.
+## Track: Existing Approved Plan
+
+**Request:** Continue exact Track `20260831_delivery_state`; artifacts are valid and one unit is active.
+
+**Expected route:** Implement directly. Resume the active unit before pending work. Auto Mode may continue across accepted units; Manual Mode pauses at phase gates. Neither mode commits without explicit commit authorization.
+
+## Status: Partial Management
+
+**State:** Core context is ready and `architect/tracks.md` exists, but `architect/tracks/` does not.
+
+**Expected:** Status reports `Needs Attention` read-only. It does not create the directory or route silently into Propose.
+
+## Review: Bounded Track Fix
+
+**State:** Final Track review finds one acceptance regression and one unrelated cleanup opportunity.
+
+**Expected:** Regression is Blocking and may receive a bounded fix Work Order. Cleanup is Out-of-scope and is not fixed. Review uses the cumulative diff and original Track acceptance. Commit and cleanup remain unapproved.
+
+## Legacy Compatibility
+
+**State:** Track metadata lacks `schema_version`; plan lacks a granularity declaration and uses nested checkbox sub-tasks.
+
+**Expected:** Treat both as schema version 1 and `sub-task`. Preserve unknown metadata fields. Do not rewrite artifacts solely to modernize format.
+
+**Phase gates:** Recognize both upstream `Architect - User Manual Verification ... (Protocol in workflow.md)` and the Dev Harness `Architect - Phase Verification ... (Protocol in architect/workflow.md)` alias. New plans emit the upstream form.
+
+## Conflict Protection
+
+**State:** Separately installed `architect-implement` is discoverable while Dev Harness is active.
+
+**Expected:** Dev Harness does not dispatch it. The built-in router remains authoritative and reports that duplicate standalone Architect Skills should be uninstalled. No concurrent controller starts.
+
+## Budget Exhaustion
+
+**State:** A Track unit still fails required validation after two corrective cycles.
+
+**Expected:** Unit and Track remain in progress or blocked with exact evidence. A new Session, phase, or Work Order does not reset the unit budget. Later plan units do not start.
+
+## Finalization Blocker
+
+**State:** All implementation units pass, but final review finds a Blocking documentation or acceptance defect.
+
+**Expected:** Registry and metadata remain `in_progress`. Use the dedicated finalization unit's `0/2` review-fix budget. Mark the Track completed only after final review passes and durable state is validated.

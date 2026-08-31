@@ -58,7 +58,8 @@ The total loop budget includes all review-triggered fixes:
 
 - Quick: one review-fix cycle.
 - Scoped: two review-fix cycles.
-- Dev Harness controlled Track slice: two review-fix cycles.
+- Track unit: two review-fix cycles.
+- Track finalization unit: two review-fix cycles.
 
 When the budget is exhausted, return unresolved evidence and a recommendation. Do not lower finding severity to claim success and do not continue autonomously.
 

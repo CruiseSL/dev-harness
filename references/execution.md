@@ -58,7 +58,7 @@ A corrective cycle is one re-edit after the initial implementation fails a requi
 
 - Quick: one corrective cycle.
 - Scoped: two corrective cycles.
-- Dev Harness controlled Track slice: two corrective cycles.
+- Track unit: two corrective cycles.
 
 For a review fix Work Order, applying the approved finding is attempt zero; one corrective cycle permits one re-edit only if that fix then fails its required validation. The Work Order may set a smaller budget. It may set a larger budget only for a named risk and explicit Coordinator decision. Correct one obvious command or environment mistake once without counting it as a product fix; repeated environment failure is a blocker.
 

@@ -47,10 +47,10 @@ Use Track when the work changes public or durable contracts, changes a security 
 
 Track defaults:
 
-- One durable Architect track for the initiative.
-- Multiple bounded Work Orders mapped to approved plan slices.
-- Each Dev Harness controlled slice keeps the Scoped two-cycle limit. Architect controlled work uses its active execution budget.
-- Architect owns durable specification, plan, status, and project-context synchronization.
+- One durable built-in Architect Track for the initiative.
+- Automatic Setup, Discuss, Propose, Implement, Review, and Status routing as required by evidence and intent.
+- Multiple bounded Work Orders mapped to approved plan units, each with the Scoped two-cycle limit.
+- Architect artifacts own durable specification, plan, status, and project-context synchronization; Dev Harness remains the single implementation controller.
 
 ## Decision Rule
 

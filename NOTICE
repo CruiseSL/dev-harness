@@ -1,0 +1,13 @@
+Dev Harness
+Copyright 2026 CruiseSL
+
+This product includes substantially modified material from SWE Skills:
+https://github.com/hlhr202/swe-skills
+
+The upstream Architect Skills are licensed under the Apache License 2.0.
+Dev Harness adapts their Setup, Discuss, Propose, Implement, Review, and Status
+protocols into one automatically routed skill with centralized artifact,
+approval, budget, commit, cleanup, and bounded-execution contracts.
+
+SWE Skills acknowledges design inspiration from Google's Conductor extension
+for Gemini CLI: https://github.com/gemini-cli-extensions/conductor

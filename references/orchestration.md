@@ -39,17 +39,7 @@ Route by role and uncertainty, not by expected lines of code:
 
 Map these profiles to local model and reasoning settings when the runtime supports it. If it does not, preserve the role and scope constraints and use the available model. Never expand scope merely to justify a stronger model.
 
-Preferred local mapping when those model aliases are available:
-
-| Profile               | Preferred model                      |
-| --------------------- | ------------------------------------ |
-| `planner-high`        | Sol with high reasoning              |
-| `executor-economical` | Luna with xhigh reasoning            |
-| `executor-deep`       | Terra with xhigh reasoning           |
-| `reviewer-high`       | Main Sol Session with high reasoning |
-| `reviewer-standard`   | Main Coordinator Session             |
-
-These are preferences, not portability requirements. Use equivalent available capability without changing the Work Order when a runtime cannot select the named model or reasoning level.
+Map profiles to the host's available models and reasoning settings. Prefer the strongest suitable reasoning capability for planning and high-risk review, an economical capable model for clear local work, and a deeper implementation model for bounded technical uncertainty. Keep repository-specific model aliases in host configuration, not in this portable Skill.
 
 ## Dispatch Rules
 

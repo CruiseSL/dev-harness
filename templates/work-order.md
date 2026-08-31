@@ -3,7 +3,7 @@
 ## Identity
 
 - **ID:** `<optional stable identifier>`
-- **Harness mode:** `<Quick|Scoped|Dev Harness controlled Track slice>`
+- **Harness mode:** `<Quick|Scoped|Track unit>`
 - **Execution profile:** `<executor-economical|executor-deep>`
 - **Owner:** Coordinator
 
@@ -43,7 +43,7 @@
 - **Relevant paths:** `<paths>`
 - **Known behavior or cause:** `<facts already established>`
 - **Allowed assumptions:** `<low-risk assumptions, or none>`
-- **Architect reference:** `<track ID and plan task, or not applicable>`
+- **Architect reference:** `<track ID, phase, and plan unit, or not applicable>`
 
 ## Validation
 
