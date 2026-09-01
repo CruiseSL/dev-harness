@@ -73,18 +73,23 @@ assert(skillFiles.length === 1, `Expected one registered Skill, found ${skillFil
 const skill = read("SKILL.md");
 assert(skill.includes("name: dev-harness"), "Skill name must be dev-harness");
 assert(skill.includes("license: Apache-2.0"), "Skill license must be Apache-2.0");
-assert(skill.includes('version: "2.1.0"'), "Skill version must be 2.1.0");
+assert(skill.includes('version: "2.2.0"'), "Skill version must be 2.2.0");
 assert(skill.includes("Route automatically"), "Root Skill must require automatic routing");
-assert(skill.includes("never silently inherit the main Session settings"), "Root Skill must forbid implicit child model inheritance");
+assert(skill.includes("silently inherit the main Session settings"), "Root Skill must forbid implicit child model inheritance");
+assert(skill.includes("never expose internal profile names"), "Root Skill must hide internal profiles from users");
 
 const orchestration = read("references/orchestration.md");
 for (const text of [
   ".agents/dev-harness.json",
-  "An explicit user choice in the current conversation",
-  "Ask the user before dispatch",
+  "Current Session",
+  "Current Project",
+  "Every Dispatch",
+  "ask for the model, reasoning value, and reuse scope",
+  "Never ask the user to select, configure, or understand a profile",
+  '"childAgent"',
+  "Version 1 files with a `profiles` object are legacy",
   "Do not use a global default",
   "main Session's model or reasoning depth",
-  "current-run configuration only",
   "verify that the child was created with those exact settings"
 ]) {
   assert(orchestration.includes(text), `Missing child execution configuration contract: ${text}`);
@@ -92,6 +97,7 @@ for (const text of [
 assert(!orchestration.includes("preserve the role and scope constraints and use the available model"), "Orchestration must not silently use an inherited model");
 
 const workOrder = read("templates/work-order.md");
+assert(workOrder.includes("**Internal execution profile:**"), "Work Order must mark execution profiles as internal");
 assert(workOrder.includes("**Child model:**"), "Work Order must record the concrete child model");
 assert(workOrder.includes("**Child reasoning:**"), "Work Order must record the concrete child reasoning depth");
 

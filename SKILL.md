@@ -3,7 +3,7 @@ name: dev-harness
 description: Run a bounded software development harness with automatic Quick, Scoped, and built-in Architect Track routing. Use for implementation, planning, discussion, review, status, durable project context, delegated execution, validation, and scope control.
 license: Apache-2.0
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Dev Harness
@@ -27,7 +27,7 @@ Coordinate software changes without turning small requests into heavyweight proj
 2. For explicit Architect status, review, setup, discuss, propose, or implement intent, or for any Track classification, read `references/architect/router.md`. Route automatically; never ask the user to choose an internal module or controller.
 3. For Quick or Scoped implementation, build one self-contained Work Order from `templates/work-order.md`.
 4. For Track implementation, let the built-in Architect lifecycle select one approved plan unit, then create one Track Work Order mapped to that unit. Architect artifacts remain authoritative for durable scope and status.
-5. Read `references/orchestration.md` and detect available delegation and model-selection capabilities. When creating a child Agent, resolve its concrete model and reasoning depth before dispatch. If the required profile is not fully configured for this project, ask the user; never silently inherit the main Session settings.
+5. Read `references/orchestration.md` and detect available delegation and model-selection capabilities. When creating a child Agent, resolve the shared child model, reasoning depth, and reuse scope before dispatch. Ask once when they are unresolved, reuse the choice according to its scope, and never expose internal profile names or silently inherit the main Session settings.
 6. Give the Executor the complete Work Order, resolved child execution settings, and the relevant rules from `references/execution.md`. Do not rely on child context inheriting this skill or model configuration.
 7. Retrieve an Executor Result matching `templates/result.md`. A dispatch is not completion; wait for or retrieve its terminal result when the runtime permits.
 8. Read `references/review.md` and review the cumulative diff against the original Work Order. Track units also load `references/architect/review.md` and durable acceptance context.

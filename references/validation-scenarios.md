@@ -14,18 +14,31 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 - A review-fix cycle is reserved before an authorized fix and never reset by redispatch.
 - Auto Mode controls continuation, not commits or destructive actions.
 - Every dispatched child has an explicit model and reasoning depth; main Session inheritance is never implicit configuration.
+- Internal profiles never create user-facing configuration boundaries.
 
 ## Missing Child Execution Configuration
 
-**State:** A Quick or Scoped Work Order needs delegation, but `.agents/dev-harness.json` is absent or the selected profile lacks `model` or `reasoning`.
+**State:** A Quick or Scoped Work Order needs delegation, but no current-Session choice or unified project `childAgent` configuration exists.
 
-**Expected:** Query host-supported child models and reasoning variants when possible, then ask the user for both missing values before dispatch. Do not create a child with inherited main Session settings. The answer applies only to the current run unless the user explicitly requests persistence.
+**Expected:** Query host-supported child models and reasoning variants when possible, then ask once for model, reasoning, and reuse scope. Do not name profiles. `Current Session` applies to every later child in that Session; `Current Project` writes version 2 configuration; `Every Dispatch` is used only when explicitly selected.
 
 ## Unsupported Child Execution Configuration
 
-**State:** The selected project profile names a model or reasoning value unavailable in the current host.
+**State:** The Session or project child configuration names a model or reasoning value unavailable in the current host.
 
-**Expected:** Treat the profile as unresolved and ask again. If the runtime cannot explicitly select both child values, do not delegate; use a safe current-Session fallback or return `blocked` when independent execution is required.
+**Expected:** Treat the shared configuration as unresolved and ask again. If the runtime cannot explicitly select both child values, do not delegate; use a safe current-Session fallback or return `blocked` when independent execution is required.
+
+## Internal Profile Change
+
+**State:** The first child used an economical Executor route and the next child uses a deep Executor or Reviewer route.
+
+**Expected:** Reuse the current Session or project model and reasoning without asking again. Internal routing may shape the initial recommendation but never exposes profile names or overrides the user's shared choice.
+
+## Legacy Profile Configuration
+
+**State:** `.agents/dev-harness.json` is version 1 with a `profiles` object.
+
+**Expected:** Ask once for a unified model, reasoning, and reuse scope, offering existing values as candidates. Do not silently select one profile. Replace with version 2 only when the user selects `Current Project`, preserving unrelated top-level fields.
 
 ## Quick: Accessible Label
 

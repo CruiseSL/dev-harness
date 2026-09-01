@@ -32,33 +32,25 @@ Dev Harness does not override user approval, repository policy, security control
 
 ## Child Model Configuration
 
-Dev Harness never silently gives a child Agent the main Agent's model or reasoning depth. Before the first dispatch for a profile, it resolves both values from the current conversation or the project's `.agents/dev-harness.json`. If either value is missing or unsupported, it asks the user before creating the child.
+Dev Harness never silently gives a child Agent the main Agent's model or reasoning depth. Before the first child dispatch, it asks for the child model, reasoning depth, and how widely to reuse the choice:
+
+- **Current Session:** Every child in the current Session reuses it.
+- **Current Project:** Every child in this project reuses it across future Sessions.
+- **Every Dispatch:** Ask again before each child; this occurs only when the user explicitly chooses it.
+
+Internal execution profiles are not user configuration boundaries. Switching between implementation and review, or between ordinary and deeper work, does not trigger another question when a Session or project choice already exists.
 
 ```json
 {
-  "version": 1,
-  "profiles": {
-    "executor-economical": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "executor-deep": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "reviewer-standard": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "reviewer-high": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    }
+  "version": 2,
+  "childAgent": {
+    "model": "<host model id or alias>",
+    "reasoning": "<host reasoning depth or variant>"
   }
 }
 ```
 
-Only profiles that the project dispatches need entries. A conversational choice applies to the current run only; Dev Harness changes the project configuration only when the user explicitly requests persistence.
+Choosing `Current Project` explicitly authorizes this file write. A version 1 file containing profile-specific settings is treated as legacy: its values may be offered as candidates, but Dev Harness asks once for a unified choice rather than exposing profiles again.
 
 ## Automatic Routing
 

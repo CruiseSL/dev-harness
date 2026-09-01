@@ -25,7 +25,7 @@ Do not name runtime-specific tools in the Work Order. A missing preferred capabi
 
 If the available fallback cannot safely handle the task, return `blocked` with the missing capability instead of pretending delegation occurred.
 
-## Model Routing
+## Internal Model Routing
 
 Route by role and uncertainty, not by expected lines of code:
 
@@ -37,50 +37,47 @@ Route by role and uncertainty, not by expected lines of code:
 | `reviewer-high`       | Contract, security, data, concurrency, or broad behavioral review      |
 | `reviewer-standard`   | Quick and ordinary Scoped diff review                                  |
 
-Each dispatched child profile must resolve to two concrete values:
+Profiles are internal routing signals used to recommend an appropriate first choice. Never ask the user to select, configure, or understand a profile. By default, every dispatched child in the same Session or project uses one shared concrete configuration regardless of whether it acts as Executor or Reviewer.
+
+The shared child configuration has two execution values:
 
 - **Model:** A host-supported model identifier or alias.
 - **Reasoning:** A host-supported reasoning depth, effort, or variant value.
 
-Resolve them in this order:
+It also has one reuse scope:
 
-1. An explicit user choice in the current conversation for this child profile.
-2. The matching profile in project-local `.agents/dev-harness.json`.
-3. Ask the user before dispatch.
+- **Current Session:** Reuse for every later child in this Session, including different internal profiles. Do not write a project file.
+- **Current Project:** Reuse in this and future Sessions in the current project. Write `.agents/dev-harness.json` after the user selects this scope; selecting it is explicit authorization for that configuration write.
+- **Every Dispatch:** Ask before every child creation. Use this only when the user explicitly selects or requests it.
 
-Do not use a global default, host default, previously unrelated project choice, or the main Session's model or reasoning depth as an implicit child setting. An abstract profile name such as `executor-deep` is routing intent, not a complete execution configuration.
+Resolve the configuration in this order:
 
-When asking, first query the runtime for available child models and reasoning values when that capability exists. Ask for both missing values together, recommend options consistent with the profile, and state which child role will use them. If the host cannot enumerate reasoning values, ask for the host-specific reasoning/variant name rather than inventing one.
+1. An explicit per-dispatch instruction in the current conversation.
+2. The shared current-Session choice, including an `Every Dispatch` policy selected earlier in the Session.
+3. The unified `childAgent` object in project-local `.agents/dev-harness.json`.
+4. Ask once before the first child dispatch.
 
-Treat the answer as current-run configuration only. Write or update `.agents/dev-harness.json` only when the user explicitly asks to persist the choice; config persistence is a project file edit and follows normal scope and review rules. A configured value that the host does not support is unresolved and must be asked again.
+Do not use a global default, host default, previously unrelated project choice, internal profile mapping, or the main Session's model or reasoning depth as an implicit child setting.
+
+When asking, first query the runtime for available child models and reasoning values when that capability exists. In one interaction ask for the model, reasoning value, and reuse scope. Recommend suitable execution values based on the internal route, but describe the work rather than naming the profile. If the host cannot enumerate reasoning values, ask for the host-specific reasoning/variant name rather than inventing one.
+
+Reuse `Current Session` and `Current Project` choices without asking again when the internal profile or child role changes. Ask again only when the selected scope requires it, the user requests a change, or a configured value is unsupported by the host.
 
 The project configuration shape is:
 
 ```json
 {
-  "version": 1,
-  "profiles": {
-    "executor-economical": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "executor-deep": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "reviewer-standard": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    },
-    "reviewer-high": {
-      "model": "<host model id or alias>",
-      "reasoning": "<host reasoning depth or variant>"
-    }
+  "version": 2,
+  "childAgent": {
+    "model": "<host model id or alias>",
+    "reasoning": "<host reasoning depth or variant>"
   }
 }
 ```
 
-Only profiles actually dispatched need configuration. Map the concrete values to the runtime's model and reasoning/variant parameters. Never expand scope merely to justify a stronger model.
+Version 1 files with a `profiles` object are legacy. Do not continue profile-specific prompting or silently choose one profile's values as the shared default. At the next child dispatch, offer existing concrete values as candidates in the single configuration question. If the user chooses `Current Project`, replace the legacy shape with version 2 while preserving unrelated top-level fields.
+
+Map the shared concrete values to the runtime's model and reasoning/variant parameters. Never expand scope merely to justify a stronger model.
 
 ## Dispatch Rules
 
