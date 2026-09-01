@@ -73,8 +73,27 @@ assert(skillFiles.length === 1, `Expected one registered Skill, found ${skillFil
 const skill = read("SKILL.md");
 assert(skill.includes("name: dev-harness"), "Skill name must be dev-harness");
 assert(skill.includes("license: Apache-2.0"), "Skill license must be Apache-2.0");
-assert(skill.includes('version: "2.0.0"'), "Skill version must be 2.0.0");
+assert(skill.includes('version: "2.1.0"'), "Skill version must be 2.1.0");
 assert(skill.includes("Route automatically"), "Root Skill must require automatic routing");
+assert(skill.includes("never silently inherit the main Session settings"), "Root Skill must forbid implicit child model inheritance");
+
+const orchestration = read("references/orchestration.md");
+for (const text of [
+  ".agents/dev-harness.json",
+  "An explicit user choice in the current conversation",
+  "Ask the user before dispatch",
+  "Do not use a global default",
+  "main Session's model or reasoning depth",
+  "current-run configuration only",
+  "verify that the child was created with those exact settings"
+]) {
+  assert(orchestration.includes(text), `Missing child execution configuration contract: ${text}`);
+}
+assert(!orchestration.includes("preserve the role and scope constraints and use the available model"), "Orchestration must not silently use an inherited model");
+
+const workOrder = read("templates/work-order.md");
+assert(workOrder.includes("**Child model:**"), "Work Order must record the concrete child model");
+assert(workOrder.includes("**Child reasoning:**"), "Work Order must record the concrete child reasoning depth");
 
 const router = read("references/architect/router.md");
 for (const route of [

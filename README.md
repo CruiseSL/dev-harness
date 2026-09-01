@@ -30,6 +30,36 @@ Restart your agent host after installation so it reloads the skill.
 
 Dev Harness does not override user approval, repository policy, security controls, or host permissions. Commits, destructive cleanup, external actions, and sensitive decisions retain explicit approval gates.
 
+## Child Model Configuration
+
+Dev Harness never silently gives a child Agent the main Agent's model or reasoning depth. Before the first dispatch for a profile, it resolves both values from the current conversation or the project's `.agents/dev-harness.json`. If either value is missing or unsupported, it asks the user before creating the child.
+
+```json
+{
+  "version": 1,
+  "profiles": {
+    "executor-economical": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "executor-deep": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "reviewer-standard": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "reviewer-high": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    }
+  }
+}
+```
+
+Only profiles that the project dispatches need entries. A conversational choice applies to the current run only; Dev Harness changes the project configuration only when the user explicitly requests persistence.
+
 ## Automatic Routing
 
 ```text

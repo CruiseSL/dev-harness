@@ -5,6 +5,8 @@
 - **ID:** `<optional stable identifier>`
 - **Harness mode:** `<Quick|Scoped|Track unit>`
 - **Execution profile:** `<executor-economical|executor-deep>`
+- **Child model:** `<resolved host model id or alias>`
+- **Child reasoning:** `<resolved host reasoning depth or variant>`
 - **Owner:** Coordinator
 
 ## Outcome

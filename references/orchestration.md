@@ -14,11 +14,11 @@ The Coordinator may also act as Reviewer. Prefer role separation over spawning a
 
 ## Capability Discovery
 
-Before dispatch, inspect the runtime's available tools and choose the first supported path:
+Before dispatch, inspect the runtime's available tools. Delegation is valid only when both the child model and reasoning depth can be selected explicitly. Resolve child settings only when a child will actually be created; an intentional current-Session execution does not need child configuration. Choose the first supported path:
 
-1. **Persistent Session with model selection:** Create or reuse a worker Session, select the requested execution profile, send the Work Order, and retrieve its terminal result.
-2. **Subagent with model selection:** Spawn one bounded Executor with the requested profile and wait for its result.
-3. **Session or Subagent without model selection:** Delegate with the available model. Reduce the Work Order to a safe size if model capability is uncertain.
+1. **Persistent Session with model and reasoning selection:** Create or reuse a worker Session with the resolved settings, send the Work Order, and retrieve its terminal result.
+2. **Subagent with model and reasoning selection:** Spawn one bounded Executor with the resolved settings and wait for its result.
+3. **No explicit child selection:** Do not spawn a child that silently inherits the main Session. Execute in the current Session with an explicit phase boundary and separate Reviewer pass, or return `blocked` when role separation is required for safety.
 4. **No delegation:** Execute in the current Session, then create an explicit phase boundary, reread the Work Order, inspect the diff, and perform a separate Reviewer pass.
 
 Do not name runtime-specific tools in the Work Order. A missing preferred capability is a routing condition, not an implementation failure.
@@ -37,13 +37,55 @@ Route by role and uncertainty, not by expected lines of code:
 | `reviewer-high`       | Contract, security, data, concurrency, or broad behavioral review      |
 | `reviewer-standard`   | Quick and ordinary Scoped diff review                                  |
 
-Map these profiles to local model and reasoning settings when the runtime supports it. If it does not, preserve the role and scope constraints and use the available model. Never expand scope merely to justify a stronger model.
+Each dispatched child profile must resolve to two concrete values:
 
-Map profiles to the host's available models and reasoning settings. Prefer the strongest suitable reasoning capability for planning and high-risk review, an economical capable model for clear local work, and a deeper implementation model for bounded technical uncertainty. Keep repository-specific model aliases in host configuration, not in this portable Skill.
+- **Model:** A host-supported model identifier or alias.
+- **Reasoning:** A host-supported reasoning depth, effort, or variant value.
+
+Resolve them in this order:
+
+1. An explicit user choice in the current conversation for this child profile.
+2. The matching profile in project-local `.agents/dev-harness.json`.
+3. Ask the user before dispatch.
+
+Do not use a global default, host default, previously unrelated project choice, or the main Session's model or reasoning depth as an implicit child setting. An abstract profile name such as `executor-deep` is routing intent, not a complete execution configuration.
+
+When asking, first query the runtime for available child models and reasoning values when that capability exists. Ask for both missing values together, recommend options consistent with the profile, and state which child role will use them. If the host cannot enumerate reasoning values, ask for the host-specific reasoning/variant name rather than inventing one.
+
+Treat the answer as current-run configuration only. Write or update `.agents/dev-harness.json` only when the user explicitly asks to persist the choice; config persistence is a project file edit and follows normal scope and review rules. A configured value that the host does not support is unresolved and must be asked again.
+
+The project configuration shape is:
+
+```json
+{
+  "version": 1,
+  "profiles": {
+    "executor-economical": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "executor-deep": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "reviewer-standard": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    },
+    "reviewer-high": {
+      "model": "<host model id or alias>",
+      "reasoning": "<host reasoning depth or variant>"
+    }
+  }
+}
+```
+
+Only profiles actually dispatched need configuration. Map the concrete values to the runtime's model and reasoning/variant parameters. Never expand scope merely to justify a stronger model.
 
 ## Dispatch Rules
 
 - Give the Executor the full self-contained Work Order. Do not assume it inherits this skill, prior discussion, repository findings, or model configuration.
+- Record the resolved model and reasoning depth in the Work Order before dispatch, and verify that the child was created with those exact settings.
 - Ensure the Executor and Coordinator share the intended repository or worktree. State isolation expectations when the runtime creates separate worktrees.
 - Use one Executor for overlapping files. Parallelize only independent Work Orders with disjoint ownership and validation.
 - The Coordinator must not concurrently edit files owned by an active Executor.

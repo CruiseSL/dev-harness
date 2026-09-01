@@ -13,6 +13,19 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 - A corrective cycle is consumed only by a re-edit after required validation fails.
 - A review-fix cycle is reserved before an authorized fix and never reset by redispatch.
 - Auto Mode controls continuation, not commits or destructive actions.
+- Every dispatched child has an explicit model and reasoning depth; main Session inheritance is never implicit configuration.
+
+## Missing Child Execution Configuration
+
+**State:** A Quick or Scoped Work Order needs delegation, but `.agents/dev-harness.json` is absent or the selected profile lacks `model` or `reasoning`.
+
+**Expected:** Query host-supported child models and reasoning variants when possible, then ask the user for both missing values before dispatch. Do not create a child with inherited main Session settings. The answer applies only to the current run unless the user explicitly requests persistence.
+
+## Unsupported Child Execution Configuration
+
+**State:** The selected project profile names a model or reasoning value unavailable in the current host.
+
+**Expected:** Treat the profile as unresolved and ask again. If the runtime cannot explicitly select both child values, do not delegate; use a safe current-Session fallback or return `blocked` when independent execution is required.
 
 ## Quick: Accessible Label
 
