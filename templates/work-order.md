@@ -7,6 +7,7 @@
 - **Internal execution profile:** `<executor-economical|executor-deep>`
 - **Child model:** `<resolved host model id or alias>`
 - **Child reasoning:** `<resolved host reasoning depth or variant>`
+- **Child Agent:** `<verified host Agent name or direct dispatch>`
 - **Child configuration source:** `<project config|current Session answer|per-dispatch answer>`
 - **Owner:** Coordinator
 

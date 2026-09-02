@@ -14,12 +14,13 @@ The Coordinator may also act as Reviewer. Prefer role separation over spawning a
 
 ## Capability Discovery
 
-Before dispatch, inspect the runtime's available tools. Delegation is valid only when both the child model and reasoning depth can be selected explicitly. The current-Session paths in this section apply only to Quick and Scoped work. Track work uses the Track Delegation Gate before its first unit can change state or files.
+Before dispatch, inspect the runtime's available tools. Delegation is valid only when both the child model and reasoning depth are explicit, either as dispatch parameters or as immutable settings on a selected named host Agent. The current-Session paths in this section apply only to Quick and Scoped work. Track work uses the Track Delegation Gate before its first unit can change state or files.
 
 1. **Persistent Session with model and reasoning selection:** Create or reuse a worker Session with the resolved settings, send the Work Order, and retrieve its terminal result.
 2. **Subagent with model and reasoning selection:** Spawn one bounded Executor with the resolved settings and wait for its result.
-3. **No explicit child selection:** Do not spawn a child that silently inherits the main Session. Execute Quick or Scoped work in the current Session with an explicit phase boundary and separate Reviewer pass, or return `blocked` when role separation is required for safety.
-4. **No delegation:** Execute Quick or Scoped work in the current Session, then create an explicit phase boundary, reread the Work Order, inspect the diff, and perform a separate Reviewer pass.
+3. **Named host Agent with pinned settings:** Select the configured Agent by name only after verifying its host definition pins the exact project model and reasoning or variant value. This is explicit selection even when the dispatch API exposes only an Agent or `subagent_type` field.
+4. **No explicit child selection:** Do not spawn a child that silently inherits the main Session. Execute Quick or Scoped work in the current Session with an explicit phase boundary and separate Reviewer pass, or return `blocked` when role separation is required for safety.
+5. **No delegation:** Execute Quick or Scoped work in the current Session, then create an explicit phase boundary, reread the Work Order, inspect the diff, and perform a separate Reviewer pass.
 
 Do not name runtime-specific tools in the Work Order. A missing preferred capability is a routing condition, not an implementation failure.
 
@@ -31,12 +32,24 @@ Every Track unit uses an Executor. For the first unit that the current Session e
 
 Before marking the first unit active, creating its Work Order, or editing any Track or implementation file:
 
-1. Read `.agents/dev-harness.json` and validate its version 2 `childAgent.model` and `childAgent.reasoning` values against the host's child-session capabilities.
+1. Read `.agents/dev-harness.json` and validate its version 2 `childAgent.model` and `childAgent.reasoning` values against the host's child-session capabilities. When `childAgent.agent` is present, verify that the named host Agent exists, is callable as a child, and pins those exact settings.
 2. If that configuration is missing, legacy, incomplete, or unsupported, query available child models and reasoning variants when possible, then ask the user once for a concrete model, reasoning value, and reuse scope.
 3. Stop with the Track `blocked` state while that question is unanswered. Do not mark the unit active, create a partial Work Order, edit Track artifacts, or edit implementation files.
-4. After the user answers, record a `Current Project` choice in `.agents/dev-harness.json` before dispatch. A `Current Session` choice may be reused only for later units of that same Track in the current Session after this gate has been satisfied; `Every Dispatch` asks again only because the user explicitly selected it.
+4. After the user answers, record a `Current Project` choice in `.agents/dev-harness.json` before dispatch. If the host requires a named Agent, create or update its project-local definition, record its name as `childAgent.agent`, and pause for a host restart when configuration is not hot-reloaded. A `Current Session` choice may be reused only for later units of that same Track in the current Session after this gate has been satisfied; `Every Dispatch` asks again only because the user explicitly selected it.
 
-For Track, capability-discovery routes 3 and 4 are not available. If the runtime cannot explicitly select the configured child model and reasoning value, return `blocked`; the Coordinator must not execute a Track unit in the current Session. This rule applies to implementation, validation, review-fix, phase-verification, and finalization units.
+For Track, capability-discovery routes 4 and 5 are not available. If the runtime cannot pass the configured values directly and cannot select a verified matching named host Agent, return `blocked`; the Coordinator must not execute a Track unit in the current Session. This rule applies to implementation, validation, review-fix, phase-verification, and finalization units.
+
+### OpenCode Named-Agent Adapter
+
+When OpenCode's `task` interface accepts `subagent_type` but not per-call model or reasoning parameters, use a project Agent as the explicit adapter:
+
+1. Materialize `.opencode/agents/dev-harness-worker.md` from `templates/opencode-worker.md`, replacing its model and variant placeholders with `childAgent.model` and `childAgent.reasoning`.
+2. Set `childAgent.agent` to `dev-harness-worker` in `.agents/dev-harness.json`.
+3. Require `mode: subagent`; verify the resolved OpenCode Agent has the exact configured `model` and `variant`, and reject a missing, inherited, or mismatched value.
+4. Restart OpenCode after creating or changing the Agent because Agent definitions are loaded at startup.
+5. In the restarted Session, dispatch every Dev Harness child with `task` using `subagent_type: "dev-harness-worker"`. Do not use a generic Agent and do not use OpenChamber Sessions as a substitute for the current Work Order.
+
+The adapter passes the Track Delegation Gate only after both project configuration and resolved host Agent metadata match. The old Session remains `blocked` after an Agent file edit because it cannot prove that the new child type is loaded.
 
 ## Internal Model Routing
 
@@ -84,6 +97,7 @@ The project configuration shape is:
 {
   "version": 2,
   "childAgent": {
+    "agent": "<optional host Agent name>",
     "model": "<host model id or alias>",
     "reasoning": "<host reasoning depth or variant>"
   }
@@ -98,6 +112,7 @@ Map the shared concrete values to the runtime's model and reasoning/variant para
 
 - Give the Executor the full self-contained Work Order. Do not assume it inherits this skill, prior discussion, repository findings, or model configuration.
 - Record the resolved model and reasoning depth in the Work Order before dispatch, and verify that the child was created with those exact settings.
+- Record the named host Agent when one is used and invoke that exact Agent for every child role covered by the shared configuration.
 - For Track Work Orders, record the child configuration source and confirm the Track Delegation Gate passed before any unit state or implementation edit.
 - Ensure the Executor and Coordinator share the intended repository or worktree. State isolation expectations when the runtime creates separate worktrees.
 - Use one Executor for overlapping files. Parallelize only independent Work Orders with disjoint ownership and validation.

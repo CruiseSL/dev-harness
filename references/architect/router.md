@@ -96,8 +96,8 @@ Implement treats one plan task, one actionable sub-task, or one phase gate as a 
 
 1. The Coordinator passes the Track Delegation Gate in `references/orchestration.md` before any unit state or file edit.
 2. Architect lifecycle selects and marks the unit.
-3. The Coordinator creates a Work Order mapped to that unit with resolved child configuration.
-4. An Executor, never the Coordinator current Session, performs the bounded change under `references/execution.md`.
+3. The Coordinator creates a Work Order mapped to that unit with resolved child configuration and its direct or named-Agent dispatch route.
+4. An Executor, never the Coordinator current Session, performs the bounded change under `references/execution.md` through the resolved direct or named-Agent route.
 5. The Reviewer applies `references/review.md` to the cumulative unit diff.
 6. Architect lifecycle records acceptance and selects the next unit.
 

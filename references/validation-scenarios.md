@@ -17,6 +17,7 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 - Internal profiles never create user-facing configuration boundaries.
 - The first unit a Session executes for each Track passes the Track Delegation Gate before any unit state, Track artifact, or implementation edit.
 - A Track never falls back to Coordinator current-Session execution when child configuration or explicit child selection is unavailable.
+- A named host Agent passes the Track gate only when it is callable as a child and pins the exact project model and reasoning or variant value.
 - Discuss is self-contained for material Track requirements and never requires a separately installed brainstorming skill.
 - A prior brainstorming synthesis is evidence for Discuss, not a second conversation to repeat.
 
@@ -43,6 +44,18 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 **State:** An approved Track has a valid child configuration, but the runtime cannot create a child with the exact model and reasoning value.
 
 **Expected:** Return `blocked` before any unit state or file edit. Do not execute the unit in the Coordinator current Session, regardless of Auto Mode, a previous current-Session choice, or an internal execution profile.
+
+## Track: OpenCode Named-Agent Adapter
+
+**State:** `.agents/dev-harness.json` configures `dev-harness-worker`, `vertexflow/gpt-5.6-terra`, and `xhigh`. OpenCode `task` accepts only `subagent_type`; the loaded project Agent `dev-harness-worker` has `mode: subagent`, the same model, and `variant: xhigh`.
+
+**Expected:** The Track Delegation Gate passes. Record `dev-harness-worker` in the Work Order and invoke `task` with `subagent_type: "dev-harness-worker"`. Do not require per-call model fields and do not use an OpenChamber Session.
+
+## Track: Named-Agent Mismatch Or Reload
+
+**State:** The named Agent is absent from the loaded host, is not a subagent, inherits a model, or pins settings different from `.agents/dev-harness.json`.
+
+**Expected:** Keep the Track blocked. Create or correct the project Agent only with authorization, require a host restart, then revalidate in the restarted Session before any Track state or implementation edit.
 
 ## Internal Profile Change
 

@@ -50,6 +50,7 @@ Internal execution profiles are not user configuration boundaries. Switching bet
 {
   "version": 2,
   "childAgent": {
+    "agent": "dev-harness-worker",
     "model": "<host model id or alias>",
     "reasoning": "<host reasoning depth or variant>"
   }
@@ -63,6 +64,8 @@ Choosing `Current Project` explicitly authorizes this file write. A version 1 fi
 Every Track unit is executed by an explicitly configured child Executor. Before the first unit that the current Session executes for a Track is marked active, receives a Work Order, or edits a Track or implementation file, Dev Harness reads `.agents/dev-harness.json`. Only a valid version 2 `childAgent` configuration suppresses the question; a prior current-Session choice from Quick work, Scoped work, or another Track, a host default, or a main Session model does not.
 
 When the local configuration is missing, legacy, incomplete, or unsupported, Dev Harness asks for the concrete model, reasoning value, and reuse scope, then pauses before any edit. If the runtime cannot create a child with that exact configuration, the Track is `blocked`; it never falls back to the Coordinator current Session.
+
+For OpenCode hosts where `task` exposes only `subagent_type`, Dev Harness supports a project-local `.opencode/agents/dev-harness-worker.md` adapter. The Agent definition pins the configured model and `variant`; after an OpenCode restart, Dev Harness verifies those values and dispatches with `subagent_type: "dev-harness-worker"`. A generic inherited Agent or an OpenChamber Session does not satisfy the gate.
 
 ## Automatic Routing
 
@@ -104,6 +107,7 @@ references/
   validation-scenarios.md
 templates/
   architect/
+  opencode-worker.md
   result.md
   work-order.md
 ```

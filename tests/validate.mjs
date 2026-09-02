@@ -51,6 +51,7 @@ const required = [
   "references/architect/defaults/code-style.md",
   "templates/work-order.md",
   "templates/result.md",
+  "templates/opencode-worker.md",
   "templates/architect/discussion.md",
   "templates/architect/spec.md",
   "templates/architect/plan.md",
@@ -73,7 +74,7 @@ assert(skillFiles.length === 1, `Expected one registered Skill, found ${skillFil
 const skill = read("SKILL.md");
 assert(skill.includes("name: dev-harness"), "Skill name must be dev-harness");
 assert(skill.includes("license: Apache-2.0"), "Skill license must be Apache-2.0");
-assert(skill.includes('version: "2.4.0"'), "Skill version must be 2.4.0");
+assert(skill.includes('version: "2.5.0"'), "Skill version must be 2.5.0");
 assert(skill.includes("Route automatically"), "Root Skill must require automatic routing");
 assert(skill.includes("silently inherit the main Session settings"), "Root Skill must forbid implicit child model inheritance");
 assert(skill.includes("never expose internal profile names"), "Root Skill must hide internal profiles from users");
@@ -94,9 +95,14 @@ for (const text of [
   "main Session's model or reasoning depth",
   "verify that the child was created with those exact settings",
   "## Track Delegation Gate",
+  "## Internal Model Routing",
+  "### OpenCode Named-Agent Adapter",
+  'subagent_type: "dev-harness-worker"',
+  "verified matching named host Agent",
+  "Do not use a generic Agent",
   "For the first unit that the current Session executes for each Track",
   "only a valid project-local `.agents/dev-harness.json` `childAgent` configuration suppresses the configuration question",
-  "For Track, capability-discovery routes 3 and 4 are not available",
+  "For Track, capability-discovery routes 4 and 5 are not available",
   "must not execute a Track unit in the current Session"
 ]) {
   assert(orchestration.includes(text), `Missing child execution configuration contract: ${text}`);
@@ -108,7 +114,7 @@ assertOrdered(
     "## Track Delegation Gate",
     "Before marking the first unit active, creating its Work Order, or editing any Track or implementation file",
     "Stop with the Track `blocked` state while that question is unanswered",
-    "For Track, capability-discovery routes 3 and 4 are not available"
+    "For Track, capability-discovery routes 4 and 5 are not available"
   ],
   "Track child configuration must block edits"
 );
@@ -117,7 +123,13 @@ const workOrder = read("templates/work-order.md");
 assert(workOrder.includes("**Internal execution profile:**"), "Work Order must mark execution profiles as internal");
 assert(workOrder.includes("**Child model:**"), "Work Order must record the concrete child model");
 assert(workOrder.includes("**Child reasoning:**"), "Work Order must record the concrete child reasoning depth");
+assert(workOrder.includes("**Child Agent:**"), "Work Order must record the named host Agent or direct dispatch");
 assert(workOrder.includes("**Child configuration source:**"), "Work Order must record the child configuration source");
+
+const openCodeWorker = read("templates/opencode-worker.md");
+for (const text of ["mode: subagent", "model: <childAgent.model>", "variant: <childAgent.reasoning>", "task: deny"]) {
+  assert(openCodeWorker.includes(text), `OpenCode worker template must include: ${text}`);
+}
 
 const router = read("references/architect/router.md");
 for (const route of [
@@ -151,7 +163,10 @@ const discuss = read("references/architect/discuss.md");
 assert(discuss.includes("automatic material-ambiguity gate"), "Discuss must support automatic entry");
 assert(!discuss.includes("Require explicit `architect-discuss` invocation"), "Discuss must not require its legacy name");
 assert(discuss.includes("self-contained requirements-discussion protocol"), "Discuss must be self-contained");
-assert(discuss.includes("standalone request to brainstorm, ideate, or explore without a Track candidate is not a Discuss trigger"), "Discuss must not claim standalone brainstorming");
+assert(
+  discuss.includes("standalone request to brainstorm, ideate, or explore without a Track candidate is not a Discuss trigger"),
+  "Discuss must not claim standalone brainstorming"
+);
 assert(discuss.includes("Never repeat a settled question"), "Discuss must reuse existing brainstorming conclusions");
 
 const propose = read("references/architect/propose.md");
@@ -164,14 +179,11 @@ assert(implement.includes("self-contained Track Work Order"), "Implement must us
 assert(implement.includes("Implementation does not authorize a commit"), "Implement must not infer commit permission");
 assert(implement.includes("## Track Delegation Gate"), "Implement must define the Track Delegation Gate");
 assert(implement.includes("Do not execute a Track unit in the current Session"), "Implement must forbid Track current-Session execution");
+assert(implement.includes("Invoke that Agent by name for the Work Order"), "Implement must invoke a verified named host Agent");
 assert(implement.includes("1. Confirm the Track Delegation Gate has passed."), "Unit execution must confirm the Track gate before mutating state");
 assertOrdered(
   implement,
-  [
-    "## Track Delegation Gate",
-    "The gate must pass before any Track state, Work Order, or implementation edit.",
-    "## Unit Execution"
-  ],
+  ["## Track Delegation Gate", "The gate must pass before any Track state, Work Order, or implementation edit.", "## Unit Execution"],
   "Track gate must precede unit execution"
 );
 assertOrdered(implement, ["units_complete", "docs_synchronized", "finalization_review", "track_completed"], "Track must not complete before final review");
@@ -180,6 +192,8 @@ assert(implement.includes("A blocker before step 8 leaves the Track `in_progress
 const scenarios = read("references/validation-scenarios.md");
 assert(scenarios.includes("## Track: Child Configuration Gate"), "Validation scenarios must cover the first Track-unit configuration gate");
 assert(scenarios.includes("## Track: No Current-Session Fallback"), "Validation scenarios must reject Track current-Session fallback");
+assert(scenarios.includes("## Track: OpenCode Named-Agent Adapter"), "Validation scenarios must accept a matching OpenCode named Agent");
+assert(scenarios.includes("## Track: Named-Agent Mismatch Or Reload"), "Validation scenarios must reject mismatched or unloaded named Agents");
 assert(scenarios.includes("## Brainstorming: Standalone Exploration"), "Validation scenarios must keep standalone brainstorming outside Architect");
 assert(scenarios.includes("## Track: Reuse Earlier Brainstorming"), "Validation scenarios must reuse prior brainstorming evidence");
 
@@ -190,11 +204,7 @@ assert(router.includes("Do not route a standalone request to brainstorm, ideate,
 assert(router.includes("skip Discuss entirely when that evidence establishes the Track direction"), "Router must reuse prior brainstorming evidence");
 assertOrdered(
   router,
-  [
-    "The Coordinator passes the Track Delegation Gate",
-    "Architect lifecycle selects and marks the unit",
-    "An Executor, never the Coordinator current Session"
-  ],
+  ["The Coordinator passes the Track Delegation Gate", "Architect lifecycle selects and marks the unit", "An Executor, never the Coordinator current Session"],
   "Router must gate Track mutation before Executor work"
 );
 

@@ -3,7 +3,7 @@ name: dev-harness
 description: Run a bounded software delivery harness with automatic Quick, Scoped, and built-in Architect Track routing. Use for implementation, project-aware planning, review, status, durable project context, delegated execution, validation, and scope control. Its internal Discuss protocol resolves material Track decisions; it is not a general brainstorming dependency.
 license: Apache-2.0
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Dev Harness
@@ -26,8 +26,8 @@ Coordinate software changes without turning small requests into heavyweight proj
 1. Read `references/classification.md`, inspect only enough repository context to understand the request, and classify it as Quick, Scoped, or Track.
 2. For explicit Architect status, review, setup, Track requirements discussion, propose, or implement intent, or for any Track classification, read `references/architect/router.md`. Route automatically; never ask the user to choose an internal module or controller.
 3. For Quick or Scoped implementation, build one self-contained Work Order from `templates/work-order.md`.
-4. For Track implementation, let the built-in Architect lifecycle select one approved plan unit. Before marking the first unit for that Track in the current Session active or editing a Track or implementation file, apply the Track Delegation Gate in `references/orchestration.md`: use a valid project-local child configuration or ask for one and pause. An unresolved Track child configuration is `blocked`; it never authorizes current-Session implementation.
-5. Read `references/orchestration.md` and detect available delegation and model-selection capabilities. Quick and Scoped work may use the documented current-Session fallback. Every Track unit uses an explicitly configured child Executor; never expose internal profile names or silently inherit the main Session settings.
+4. For Track implementation, let the built-in Architect lifecycle select one approved plan unit. Before marking the first unit for that Track in the current Session active or editing a Track or implementation file, apply the Track Delegation Gate in `references/orchestration.md`: require a valid project-local child configuration plus a compatible direct or named-Agent dispatch route, or ask for one and pause. An unresolved Track child configuration is `blocked`; it never authorizes current-Session implementation.
+5. Read `references/orchestration.md` and detect available delegation and model-selection capabilities. Quick and Scoped work may use the documented current-Session fallback. Every Track unit uses an explicitly configured child Executor, either through per-dispatch model parameters or a named host Agent with matching pinned settings; never expose internal profile names or silently inherit the main Session settings.
 6. Give the Executor the complete Work Order, resolved child execution settings, and the relevant rules from `references/execution.md`. Do not rely on child context inheriting this skill or model configuration.
 7. Retrieve an Executor Result matching `templates/result.md`. A dispatch is not completion; wait for or retrieve its terminal result when the runtime permits.
 8. Read `references/review.md` and review the cumulative diff against the original Work Order. Track units also load `references/architect/review.md` and durable acceptance context.

@@ -57,6 +57,7 @@ Before marking the first unit that the current Session executes for this Track a
 
 - Read the valid project-local child configuration first.
 - When it is absent, legacy, incomplete, or unsupported, ask for the concrete child model, reasoning value, and reuse scope, then pause with the Track `blocked`.
+- When dispatch uses a named host Agent, verify that it is loaded as a child and pins the exact configured model and reasoning or variant value. Invoke that Agent by name for the Work Order.
 - Do not use an earlier current-Session choice from Quick work, Scoped work, or another Track, a host default, main Session model, or internal profile to bypass the question for the first Track unit in this Session.
 - Do not execute a Track unit in the current Session. An unavailable explicit child model or reasoning selection blocks the unit instead of allowing a current-Session fallback.
 
