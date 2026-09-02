@@ -30,11 +30,17 @@ Restart your agent host after installation so it reloads the skill.
 
 Dev Harness does not override user approval, repository policy, security controls, or host permissions. Commits, destructive cleanup, external actions, and sensitive decisions retain explicit approval gates.
 
+## Discussion Routing
+
+Dev Harness includes a self-contained Discuss protocol for material requirements and architecture decisions in a Track. It does not require a separately installed brainstorming skill.
+
+Use general brainstorming for standalone exploration. When the user asks to plan or implement a Track and a material decision is unresolved, Dev Harness enters Discuss. If the conversation already contains a brainstorming synthesis, Discuss treats confirmed decisions as evidence, asks only about remaining material gaps, and skips itself entirely when the direction is already established. It does not create a second discussion, Track artifact, or implementation contract for standalone exploration.
+
 ## Child Model Configuration
 
 Dev Harness never silently gives a child Agent the main Agent's model or reasoning depth. Before the first child dispatch, it asks for the child model, reasoning depth, and how widely to reuse the choice:
 
-- **Current Session:** Every child in the current Session reuses it.
+- **Current Session:** Every later Quick or Scoped child in the current Session reuses it. Track applies the stricter gate below.
 - **Current Project:** Every child in this project reuses it across future Sessions.
 - **Every Dispatch:** Ask again before each child; this occurs only when the user explicitly chooses it.
 
@@ -51,6 +57,12 @@ Internal execution profiles are not user configuration boundaries. Switching bet
 ```
 
 Choosing `Current Project` explicitly authorizes this file write. A version 1 file containing profile-specific settings is treated as legacy: its values may be offered as candidates, but Dev Harness asks once for a unified choice rather than exposing profiles again.
+
+### Track Delegation Gate
+
+Every Track unit is executed by an explicitly configured child Executor. Before the first unit that the current Session executes for a Track is marked active, receives a Work Order, or edits a Track or implementation file, Dev Harness reads `.agents/dev-harness.json`. Only a valid version 2 `childAgent` configuration suppresses the question; a prior current-Session choice from Quick work, Scoped work, or another Track, a host default, or a main Session model does not.
+
+When the local configuration is missing, legacy, incomplete, or unsupported, Dev Harness asks for the concrete model, reasoning value, and reuse scope, then pauses before any edit. If the runtime cannot create a child with that exact configuration, the Track is `blocked`; it never falls back to the Coordinator current Session.
 
 ## Automatic Routing
 

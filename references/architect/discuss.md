@@ -4,13 +4,15 @@
 
 ## Purpose
 
-Resolve product and architecture decisions that can materially change a Track before proposal artifacts are created. Discuss is an internal phase, not a separately invoked dependency and not an implementation controller.
+Resolve product and architecture decisions that can materially change a Track before proposal artifacts are created. Discuss is Dev Harness' self-contained requirements-discussion protocol: it has the dialogue purpose of general brainstorming without requiring a separately installed brainstorming skill. It is an internal phase, not a separately invoked dependency and not an implementation controller.
 
 ## Entry
 
-Enter when `references/architect/router.md` detects at least one material unresolved decision. Also accept explicit requests to discuss, brainstorm, compare architecture options, or use the legacy `architect-discuss` alias.
+Enter when `references/architect/router.md` detects at least one material unresolved decision in a Track request. Also accept a Track-scoped requirements discussion, architecture comparison, or the legacy `architect-discuss` alias.
 
-Do not enter merely because work is large, unfamiliar, or technically detailed. Skip gates already established by the request, repository evidence, or approved Architect context.
+Do not enter merely because work is large, unfamiliar, or technically detailed. A standalone request to brainstorm, ideate, or explore without a Track candidate is not a Discuss trigger. Skip gates already established by the request, repository evidence, an approved Architect context, or an earlier brainstorming conversation.
+
+If a general brainstorming skill or earlier conversation has already produced a synthesis, use it as input. Extract confirmed decisions, assumptions, deferred items, and remaining material questions before asking anything. Never repeat a settled question or start a second discussion merely because the input used another discussion workflow.
 
 ## Hard Boundaries
 
@@ -43,10 +45,11 @@ Each gate is `Passed`, `Needs input`, or `Deferred`, with pass mode `Explicit`, 
 - Recommend a direction and reason before asking when evidence supports one.
 - Do not invent answers for business priority, target audience, policy, compliance, or success criteria.
 - A low-risk assumption may auto-pass only when it cannot change a boundary named in the Discuss Gate in `references/architect/router.md`.
+- If an earlier brainstorming synthesis covers a gate, mark it `Passed` with that synthesis as evidence. Ask only about an unresolved material gap.
 
 ## Analysis Shape
 
-1. Build shallow targeted context from Architect core, relevant Tracks, direct code/docs, APIs, schemas, and service boundaries.
+1. Intake any earlier brainstorming synthesis or relevant conversation, then build shallow targeted context from Architect core, relevant Tracks, direct code/docs, APIs, schemas, and service boundaries.
 2. Stabilize problem, users, value, goals, non-goals, success, and affected domains.
 3. Split separable initiatives and identify one proposal-sized unit.
 4. Clarify behavior that affects architecture: roles, journeys, rules, state, failures, configuration, and compatibility.
@@ -62,6 +65,7 @@ Use `templates/architect/discussion.md`. Remove contradictory assumptions, unres
 
 ## Handoff
 
+- A standalone exploration remains outside Architect and creates no Track, artifact, or implementation contract.
 - If the originating intent was discussion only, present the synthesis and stop.
 - If the user requested planning or implementation and the synthesis is ready, route automatically to `references/architect/propose.md` without asking which module to use.
 - Proposal still requires separate spec and plan approvals.

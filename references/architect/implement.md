@@ -51,18 +51,30 @@ Registry, metadata, parent tasks, sub-tasks, and phase gates follow `references/
 5. For `task` granularity, execute the parent and its nested details as one unit.
 6. A malformed declaration, mixed grammar, or unrecognized unfinished checkbox structure blocks mutation.
 
+## Track Delegation Gate
+
+Before marking the first unit that the current Session executes for this Track active, creating its Work Order, or editing any Track or implementation file, apply `references/orchestration.md`'s Track Delegation Gate.
+
+- Read the valid project-local child configuration first.
+- When it is absent, legacy, incomplete, or unsupported, ask for the concrete child model, reasoning value, and reuse scope, then pause with the Track `blocked`.
+- Do not use an earlier current-Session choice from Quick work, Scoped work, or another Track, a host default, main Session model, or internal profile to bypass the question for the first Track unit in this Session.
+- Do not execute a Track unit in the current Session. An unavailable explicit child model or reasoning selection blocks the unit instead of allowing a current-Session fallback.
+
+The gate must pass before any Track state, Work Order, or implementation edit. A `Current Project` response writes the configuration before dispatch; a `Current Session` response may be reused only for later units of this Track in this Session after the initial gate has passed.
+
 ## Unit Execution
 
 For each selected unit:
 
-1. Persist the parent and selected sub-task state as active before implementation edits.
-2. Create a self-contained Track Work Order from `templates/work-order.md` containing the Track ID, plan unit, relevant spec acceptance, owned files, non-goals, validation, and budget.
-3. Delegate through `references/orchestration.md`. The Executor must not edit Architect artifacts unless the Work Order explicitly assigns a precise lifecycle write.
-4. Apply `references/execution.md` with the smallest correct implementation and Track-unit budget.
-5. Review the cumulative unit diff under `references/review.md` plus the Track spec, plan, project context, and style guides.
-6. Apply only authorized Blocking fixes within the unit budget.
-7. On acceptance, mark the unit complete and record a concise summary plus an explicitly authorized short commit SHA or `no-commit`.
-8. Rescan the phase before selecting later work.
+1. Confirm the Track Delegation Gate has passed.
+2. Persist the parent and selected sub-task state as active before implementation edits.
+3. Create a self-contained Track Work Order from `templates/work-order.md` containing the Track ID, plan unit, relevant spec acceptance, owned files, non-goals, validation, budget, and resolved child configuration source.
+4. Delegate through `references/orchestration.md`. The Executor must not edit Architect artifacts unless the Work Order explicitly assigns a precise lifecycle write.
+5. Apply `references/execution.md` with the smallest correct implementation and Track-unit budget.
+6. Review the cumulative unit diff under `references/review.md` plus the Track spec, plan, project context, and style guides.
+7. Apply only authorized Blocking fixes within the unit budget.
+8. On acceptance, mark the unit complete and record a concise summary plus an explicitly authorized short commit SHA or `no-commit`.
+9. Rescan the phase before selecting later work.
 
 Auto Mode continues to the next unit after acceptance. Task size alone is not a stop condition, but every unit remains bounded and independently reviewed.
 

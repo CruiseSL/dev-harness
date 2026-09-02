@@ -53,6 +53,12 @@ Transitions are automatic when the next stage is already authorized and has no u
 
 ## Discuss Gate
 
+Discuss is Dev Harness' self-contained requirements-discussion protocol for Track candidates. It does not require a separately installed brainstorming skill and does not create a second conversation when an earlier brainstorming synthesis is available.
+
+Before entering Discuss, inspect the current conversation for an earlier requirements or brainstorming synthesis. Treat confirmed decisions as evidence, identify only remaining material gaps, and skip Discuss entirely when that evidence establishes the Track direction.
+
+Do not route a standalone request to brainstorm, ideate, or explore into Architect unless it also establishes a Track candidate and asks for planning or implementation. Standalone exploration creates no Track artifacts and stays outside the Architect lifecycle.
+
 Enter Discuss only when an unresolved answer can materially change one of these:
 
 - Product scope, target user, required behavior, or success criteria.
@@ -88,11 +94,12 @@ Do not ask `Which Architect skill should I use?` or expose controller selection.
 
 Implement treats one plan task, one actionable sub-task, or one phase gate as a Track unit.
 
-1. Architect lifecycle selects and marks the unit.
-2. The Coordinator creates a Work Order mapped to that unit.
-3. An Executor performs the bounded change under `references/execution.md`.
-4. The Reviewer applies `references/review.md` to the cumulative unit diff.
-5. Architect lifecycle records acceptance and selects the next unit.
+1. The Coordinator passes the Track Delegation Gate in `references/orchestration.md` before any unit state or file edit.
+2. Architect lifecycle selects and marks the unit.
+3. The Coordinator creates a Work Order mapped to that unit with resolved child configuration.
+4. An Executor, never the Coordinator current Session, performs the bounded change under `references/execution.md`.
+5. The Reviewer applies `references/review.md` to the cumulative unit diff.
+6. Architect lifecycle records acceptance and selects the next unit.
 
 Auto Mode continues across accepted units. Manual Mode pauses only at configured phase gates. A failed unit does not reset its corrective or review-fix budget by being redispatched.
 

@@ -15,6 +15,10 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 - Auto Mode controls continuation, not commits or destructive actions.
 - Every dispatched child has an explicit model and reasoning depth; main Session inheritance is never implicit configuration.
 - Internal profiles never create user-facing configuration boundaries.
+- The first unit a Session executes for each Track passes the Track Delegation Gate before any unit state, Track artifact, or implementation edit.
+- A Track never falls back to Coordinator current-Session execution when child configuration or explicit child selection is unavailable.
+- Discuss is self-contained for material Track requirements and never requires a separately installed brainstorming skill.
+- A prior brainstorming synthesis is evidence for Discuss, not a second conversation to repeat.
 
 ## Missing Child Execution Configuration
 
@@ -22,11 +26,23 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 
 **Expected:** Query host-supported child models and reasoning variants when possible, then ask once for model, reasoning, and reuse scope. Do not name profiles. `Current Session` applies to every later child in that Session; `Current Project` writes version 2 configuration; `Every Dispatch` is used only when explicitly selected.
 
-## Unsupported Child Execution Configuration
+## Quick/Scoped: Unsupported Child Execution Configuration
 
-**State:** The Session or project child configuration names a model or reasoning value unavailable in the current host.
+**State:** A Quick or Scoped Session or project child configuration names a model or reasoning value unavailable in the current host.
 
 **Expected:** Treat the shared configuration as unresolved and ask again. If the runtime cannot explicitly select both child values, do not delegate; use a safe current-Session fallback or return `blocked` when independent execution is required.
+
+## Track: Child Configuration Gate
+
+**State:** An approved Track has no valid version 2 `.agents/dev-harness.json` `childAgent` configuration. The Coordinator has a prior current-Session child choice from unrelated Quick or Scoped work.
+
+**Expected:** Before marking the first Track unit for that Track in the current Session active, creating a Work Order, or editing any Track or implementation file, ask for concrete child model, reasoning value, and reuse scope, then pause. The previous current-Session choice does not bypass the first-unit gate. A `Current Project` answer writes the version 2 configuration before dispatch.
+
+## Track: No Current-Session Fallback
+
+**State:** An approved Track has a valid child configuration, but the runtime cannot create a child with the exact model and reasoning value.
+
+**Expected:** Return `blocked` before any unit state or file edit. Do not execute the unit in the Coordinator current Session, regardless of Auto Mode, a previous current-Session choice, or an internal execution profile.
 
 ## Internal Profile Change
 
@@ -63,6 +79,18 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 **Request:** Add cross-service synchronization without stating the source of truth or consistency model.
 
 **Expected route:** Discuss automatically. It asks the material ownership decision, compares viable options, and synthesizes only after readiness. It creates no Track. When the originating request includes planning or implementation, it routes to Propose after synthesis without asking which Skill to use.
+
+## Brainstorming: Standalone Exploration
+
+**Request:** Explore possible ideas for a future product area without asking to plan, build, or change an existing Track.
+
+**Expected route:** Stay outside Architect. Do not create a Track, Discuss state, proposal artifact, or implementation contract. A host may use any available general brainstorming workflow; Dev Harness does not require it.
+
+## Track: Reuse Earlier Brainstorming
+
+**State:** A request to plan or implement a Track includes an earlier brainstorming synthesis with confirmed product scope, success criteria, and architecture direction, but omits one material rollout decision.
+
+**Expected route:** Discuss reads the synthesis as evidence, preserves its confirmed decisions, and asks only the rollout question. It does not restart requirements discovery or duplicate prior questions. Once resolved, it routes to Propose when the originating request includes planning or implementation.
 
 ## Track: Existing Approved Plan
 
