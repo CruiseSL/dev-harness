@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "track-never-falls-back-to-current-session",
+      "canonical": {
+        "path": "references/orchestration.md",
+        "includes": "the Coordinator must not execute a Track unit in the current Session"
+      },
+      "duplicates": [
+        {
+          "path": "references/architect/implement.md",
+          "includes": "Do not execute a Track unit in the current Session."
+        }
+      ]
+    },
+    {
+      "id": "review-does-not-authorize-fixes",
+      "canonical": {
+        "path": "references/review.md",
+        "includes": "Review is read-only by default."
+      },
+      "duplicates": [
+        {
+          "path": "references/architect/review.md",
+          "includes": "Review never authorizes edits by itself."
+        }
+      ]
+    }
+  ]
+}

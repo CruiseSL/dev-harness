@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "track-respects-required-independence",
+      "canonical": {
+        "path": "references/orchestration.md",
+        "includes": "Do not silently replace a required independent Executor with the Coordinator."
+      },
+      "duplicates": [
+        {
+          "path": "references/architect/implement.md",
+          "includes": "Do not silently replace a required independent Executor with the Coordinator."
+        }
+      ]
+    },
+    {
+      "id": "review-does-not-authorize-fixes",
+      "canonical": {
+        "path": "references/review.md",
+        "includes": "Review is read-only by default."
+      },
+      "duplicates": [
+        {
+          "path": "references/architect/review.md",
+          "includes": "Review never authorizes edits by itself."
+        }
+      ]
+    }
+  ]
+}

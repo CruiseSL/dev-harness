@@ -35,9 +35,14 @@ const required = [
   "LICENSE",
   "NOTICE",
   "references/classification.md",
+  "references/codex-dispatch.md",
+  "references/delivery.md",
+  "references/technical-quality.md",
   "references/orchestration.md",
   "references/execution.md",
   "references/review.md",
+  "references/route-manifest.json",
+  "references/track-gate.md",
   "references/validation-scenarios.md",
   "references/architect/router.md",
   "references/architect/contracts.md",
@@ -47,11 +52,17 @@ const required = [
   "references/architect/implement.md",
   "references/architect/review.md",
   "references/architect/status.md",
+  "references/architect/track-runtime.md",
   "references/architect/defaults/delivery.md",
   "references/architect/defaults/code-style.md",
   "templates/work-order.md",
+  "scripts/attestation.mjs",
   "templates/result.md",
   "templates/opencode-worker.md",
+  "templates/executor-contract.md",
+  "templates/reviewer-contract.md",
+  "templates/codex-project-config.json",
+  "scripts/codex-dispatch.mjs",
   "templates/architect/discussion.md",
   "templates/architect/spec.md",
   "templates/architect/plan.md",
@@ -74,12 +85,24 @@ assert(skillFiles.length === 1, `Expected one registered Skill, found ${skillFil
 const skill = read("SKILL.md");
 assert(skill.includes("name: dev-harness"), "Skill name must be dev-harness");
 assert(skill.includes("license: Apache-2.0"), "Skill license must be Apache-2.0");
-assert(skill.includes('version: "2.5.0"'), "Skill version must be 2.5.0");
-assert(skill.includes("Route automatically"), "Root Skill must require automatic routing");
+assert(skill.includes('version: "2.6.0"'), "Skill version must be 2.6.0");
+assert(skill.includes("Route explicit intent before classification"), "Root Skill must require automatic intent routing");
 assert(skill.includes("silently inherit the main Session settings"), "Root Skill must forbid implicit child model inheritance");
-assert(skill.includes("never expose internal profile names"), "Root Skill must hide internal profiles from users");
+assert(skill.includes("Never expose internal profile names"), "Root Skill must hide internal profiles from users");
 assert(skill.includes("Track Delegation Gate"), "Root Skill must require the Track Delegation Gate");
 assert(skill.includes("not a general brainstorming dependency"), "Root Skill must distinguish Track Discuss from general brainstorming");
+assert(skill.includes("references/track-gate.md"), "Root Skill must load the compact Track gate");
+assert(skill.includes("references/architect/track-runtime.md"), "Root Skill must load the compact Track runtime");
+for (const text of [
+  "Route explicit intent before classification",
+  "Quick runs in the Coordinator current Session by default",
+  "Scoped runs as one bounded Coordinator execution pass by default",
+  "Only when dispatch is selected",
+  "Record validation evidence by command, scope/input fingerprint",
+  "Track lifecycle bookkeeping, external polling, deadlines, and provider status remain Coordinator work"
+]) {
+  assert(skill.includes(text), `Missing throughput root contract: ${text}`);
+}
 
 const orchestration = read("references/orchestration.md");
 for (const text of [
@@ -100,10 +123,15 @@ for (const text of [
   'subagent_type: "dev-harness-worker"',
   "verified matching named host Agent",
   "Do not use a generic Agent",
-  "For the first unit that the current Session executes for each Track",
-  "only a valid project-local `.agents/dev-harness.json` `childAgent` configuration suppresses the configuration question",
-  "For Track, capability-discovery routes 4 and 5 are not available",
-  "must not execute a Track unit in the current Session"
+  "## Dispatch Rules",
+  "Complete the Work Order Execution Attestation immediately before dispatch",
+  "schema version 2",
+  "executionBinding",
+  "returned envelope is already the complete stdin for `verify`",
+  "binds execution identity and Track gate evidence",
+  "Reject a missing, placeholder, stale, or ambiguous attestation before dispatch",
+  "An Executor never commits, pushes, publishes or tags",
+  "the Work Order is not Executor authorization"
 ]) {
   assert(orchestration.includes(text), `Missing child execution configuration contract: ${text}`);
 }
@@ -112,9 +140,9 @@ assertOrdered(
   orchestration,
   [
     "## Track Delegation Gate",
-    "Before marking the first unit active, creating its Work Order, or editing any Track or implementation file",
-    "Stop with the Track `blocked` state while that question is unanswered",
-    "For Track, capability-discovery routes 4 and 5 are not available"
+    "Before dispatching a delegated unit or allowing child writes:",
+    "Stop the delegated unit with `blocked` while its configuration is unresolved",
+    "Do not silently replace a required independent Executor with the Coordinator."
   ],
   "Track child configuration must block edits"
 );
@@ -125,10 +153,52 @@ assert(workOrder.includes("**Child model:**"), "Work Order must record the concr
 assert(workOrder.includes("**Child reasoning:**"), "Work Order must record the concrete child reasoning depth");
 assert(workOrder.includes("**Child Agent:**"), "Work Order must record the named host Agent or direct dispatch");
 assert(workOrder.includes("**Child configuration source:**"), "Work Order must record the child configuration source");
+for (const text of [
+  "## Execution Attestation",
+  "**Verifier:**",
+  "**Baseline status:**",
+  "### Verification Envelope",
+  "complete `envelope` object",
+  "schema version 2",
+  "already the complete stdin"
+]) {
+  assert(workOrder.includes(text), `Work Order must include attestation field: ${text}`);
+}
+for (const text of ["**Shared-contract trigger:**", "**Broad-check gate:**", "### Evidence Ledger", "**External validation:**"]) {
+  assert(workOrder.includes(text), `Work Order must include validation ledger field: ${text}`);
+}
 
 const openCodeWorker = read("templates/opencode-worker.md");
-for (const text of ["mode: subagent", "model: <childAgent.model>", "variant: <childAgent.reasoning>", "task: deny"]) {
+assert(openCodeWorker.replace(/^---\n[\s\S]*?\n---\n/, "").trim() === read("templates/executor-contract.md").trim(), "OpenCode and Codex must share the same canonical Executor contract");
+for (const text of [
+  "mode: subagent",
+  "model: <childAgent.model>",
+  "variant: <childAgent.reasoning>",
+  "skill: deny",
+  "task: deny",
+  "question: deny",
+  "Reject the Work Order as `blocked` with zero writes",
+  "complete, unmodified schema version 2 Verification Envelope",
+  "already the complete CLI input",
+  "reports any mismatch or invalid attestation",
+  "Do not load Dev Harness, `SKILL.md`, or another controller",
+  "Do not commit, push, publish or tag, deploy, send externally, run a migration, clean up, delete, or perform another destructive action.",
+  "Return the requested operation to the Coordinator",
+  "Do not claim harness-level acceptance"
+]) {
   assert(openCodeWorker.includes(text), `OpenCode worker template must include: ${text}`);
+}
+
+const reviewProtocol = read("references/review.md");
+for (const text of [
+  "## Inputs",
+  "Local review, including small Track units",
+  "original compact checklist",
+  "current-Session changed-file list and cumulative diff",
+  "Delegated review",
+  "approved Work Order, Executor Result"
+]) {
+  assert(reviewProtocol.includes(text), `Review must support local and delegated input contracts: ${text}`);
 }
 
 const router = read("references/architect/router.md");
@@ -158,6 +228,12 @@ for (const text of [
 ]) {
   assert(contracts.includes(text), `Missing shared contract: ${text}`);
 }
+assert(contracts.includes("Only the current user may explicitly approve a larger limit"), "Budget extension must require current-user approval");
+
+const classification = read("references/classification.md");
+assert(classification.includes("One compact in-memory Coordinator checklist"), "Quick must avoid a full Work Order by default");
+assert(classification.includes("Sending one canary message to one explicitly named internal recipient is Scoped"), "Internal canary must classify as Scoped");
+assert(classification.includes("external send still requires exact current-conversation authorization"), "Canary send must retain exact authorization");
 
 const discuss = read("references/architect/discuss.md");
 assert(discuss.includes("automatic material-ambiguity gate"), "Discuss must support automatic entry");
@@ -178,35 +254,93 @@ const implement = read("references/architect/implement.md");
 assert(implement.includes("self-contained Track Work Order"), "Implement must use bounded Work Orders");
 assert(implement.includes("Implementation does not authorize a commit"), "Implement must not infer commit permission");
 assert(implement.includes("## Track Delegation Gate"), "Implement must define the Track Delegation Gate");
-assert(implement.includes("Do not execute a Track unit in the current Session"), "Implement must forbid Track current-Session execution");
+assert(implement.includes("The Coordinator may execute a small bounded Track unit locally"), "Implement must allow ownership-checked local Track work");
 assert(implement.includes("Invoke that Agent by name for the Work Order"), "Implement must invoke a verified named host Agent");
-assert(implement.includes("1. Confirm the Track Delegation Gate has passed."), "Unit execution must confirm the Track gate before mutating state");
+assert(implement.includes("1. Confirm local ownership or that the Track Delegation Gate has passed for delegation."), "Unit execution must confirm the Track gate before mutating state");
 assertOrdered(
   implement,
-  ["## Track Delegation Gate", "The gate must pass before any Track state, Work Order, or implementation edit.", "## Unit Execution"],
+  ["## Track Delegation Gate", "The gate must pass before delegated Work Order creation or child edits.", "## Unit Execution"],
   "Track gate must precede unit execution"
 );
 assertOrdered(implement, ["units_complete", "docs_synchronized", "finalization_review", "track_completed"], "Track must not complete before final review");
 assert(implement.includes("A blocker before step 8 leaves the Track `in_progress`"), "Finalization failure must preserve active Track state");
+assert(implement.includes("Adjacent pending units may be merged into one bounded Work Order only when"), "Compatible Track units must support bounded merging");
+assert(implement.includes("never dispatch a bookkeeping-only child"), "Track bookkeeping must remain Coordinator-owned");
+
+const execution = read("references/execution.md");
+for (const text of [
+  "Maintain a validation evidence ledger",
+  "invalidate only entries whose recorded inputs or relevant files changed",
+  "Documentation, lifecycle bookkeeping, or one changed test expectation does not trigger a broad validation bundle",
+  "Executors do not wait or poll",
+  "Budget limits are hard stop conditions",
+  "Only the current user may explicitly approve a new limit"
+]) {
+  assert(execution.includes(text), `Missing throughput execution contract: ${text}`);
+}
+
+const standardReview = read("references/review.md");
+assert(standardReview.includes("Do not create a new parent Work Order, Track, or Reviewer Session"), "Mechanical review fixes must stay in the active cycle");
+assert(standardReview.includes("Coordinator cannot turn `2/2` into `3/3` or `4/4`"), "Review budgets must not auto-expand");
 
 const scenarios = read("references/validation-scenarios.md");
 assert(scenarios.includes("## Track: Child Configuration Gate"), "Validation scenarios must cover the first Track-unit configuration gate");
-assert(scenarios.includes("## Track: No Current-Session Fallback"), "Validation scenarios must reject Track current-Session fallback");
+assert(scenarios.includes("## Track: Local Execution And Required Independence"), "Validation scenarios must cover local work and required independent execution");
 assert(scenarios.includes("## Track: OpenCode Named-Agent Adapter"), "Validation scenarios must accept a matching OpenCode named Agent");
 assert(scenarios.includes("## Track: Named-Agent Mismatch Or Reload"), "Validation scenarios must reject mismatched or unloaded named Agents");
 assert(scenarios.includes("## Brainstorming: Standalone Exploration"), "Validation scenarios must keep standalone brainstorming outside Architect");
 assert(scenarios.includes("## Track: Reuse Earlier Brainstorming"), "Validation scenarios must reuse prior brainstorming evidence");
+assert(scenarios.includes("## Worker: Recursive Control Boundary"), "Validation scenarios must forbid worker recursive control paths");
+assert(scenarios.includes("## Worker: Attestation Mismatch"), "Validation scenarios must reject invalid worker attestations");
+assert(scenarios.includes("## Worker: Consequential Operation Authorization"), "Validation scenarios must require exact consequential-operation authorization");
 
 assert(router.includes("Track Delegation Gate"), "Router must route Track units through the delegation gate");
-assert(router.includes("An Executor, never the Coordinator current Session"), "Router must forbid the Coordinator from executing Track units");
+assert(router.includes("The Coordinator or assigned Executor"), "Router must support local or delegated Track work");
+assert(router.includes("references/track-gate.md"), "Router must route Track units through the compact gate");
+assert(router.includes("references/architect/track-runtime.md"), "Router must route passed Track units through the compact runtime");
 assert(router.includes("self-contained requirements-discussion protocol for Track candidates"), "Router must make Discuss self-contained");
 assert(router.includes("Do not route a standalone request to brainstorm, ideate, or explore into Architect"), "Router must keep standalone brainstorming outside Architect");
 assert(router.includes("skip Discuss entirely when that evidence establishes the Track direction"), "Router must reuse prior brainstorming evidence");
 assertOrdered(
   router,
-  ["The Coordinator passes the Track Delegation Gate", "Architect lifecycle selects and marks the unit", "An Executor, never the Coordinator current Session"],
+  ["The Coordinator selects local or delegated work", "Architect lifecycle selects and marks the unit", "The Coordinator or assigned Executor"],
   "Router must gate Track mutation before Executor work"
 );
+
+const trackGate = read("references/track-gate.md");
+for (const text of [
+  "version 2",
+  "childAgent.model",
+  "childAgent.reasoning",
+  "fails closed",
+  "named Agent",
+  "pins the exact configured model and reasoning or variant",
+  "Do not silently replace a required independent Executor with the Coordinator."
+]) {
+  assert(trackGate.includes(text), `Track gate runtime must include: ${text}`);
+}
+assertOrdered(
+  trackGate,
+  [
+    "query available child models and reasoning variants when possible",
+    "ask the user once for a concrete model, reasoning value, and reuse scope",
+    "While that question is unanswered, return the delegated unit `blocked`",
+    "record a `Current Project` choice in `.agents/dev-harness.json` before dispatch"
+  ],
+  "Track gate must ask once and pause before configuration writes or dispatch"
+);
+
+const trackRuntime = read("references/architect/track-runtime.md");
+for (const text of [
+  "resume the active approved unit",
+  "The Coordinator owns lifecycle bookkeeping",
+  "self-contained Work Order",
+  "Do not begin review before implementation evidence exists",
+  "Redispatch, a new Work Order, a new Session, or a later phase never resets a unit budget",
+  "requires exact current-conversation authorization"
+]) {
+  assert(trackRuntime.includes(text), `Track runtime must include: ${text}`);
+}
 
 const plan = read("templates/architect/plan.md");
 assert(plan.includes("User Manual Verification"), "New plans must emit the upstream v1 phase gate");
@@ -275,6 +409,20 @@ for (const forbidden of [
   assert(!packageText.includes(forbidden), `Forbidden legacy contract text: ${forbidden}`);
 }
 
+
+
+for (const path of ["SKILL.md", "references/orchestration.md", "references/track-gate.md", "references/architect/track-runtime.md", "references/architect/implement.md", "references/architect/router.md"]) {
+  const content = read(path);
+  assert(!/Coordinator current Session (never executes|must not execute)|Do not execute a Track unit in the current Session/.test(content), `${path} retains mandatory delegation`);
+}
+assert(orchestration.includes("Missing `reviewerAgent` blocks only reviewer dispatch"), "Missing reviewer must not inherit developer settings");
+assert(trackRuntime.includes("Never edit an active Executor's files concurrently"), "Local execution must preserve child ownership");
+assert(orchestration.includes("Keep the same Executor for a deliverable"), "Fixes should reuse developer context");
+assert(read("README.md").includes("does not switch an already running Codex session"), "Main preference is not a live switch");
+
+for (const path of ["references/orchestration.md", "references/execution.md", "templates/executor-contract.md", "references/review.md", "references/validation-scenarios.md"]) {
+  assert(read(path).includes("same-ID amend"), `${path} must support same-owner repair amendments`);
+}
 console.log(
   `Validated dev-harness package: ${files.length} files, one registered Skill, automatic Architect routing, v1 compatibility, bounded finalization, explicit approvals, and Apache-2.0 attribution.`
 );

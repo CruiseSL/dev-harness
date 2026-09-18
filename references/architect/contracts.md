@@ -134,6 +134,7 @@ Authorization is not inherited across rows. Auto Mode controls continuation and 
 ## Commit Contract
 
 - Never infer commit authorization from setup, proposal, implementation, Auto Mode, review, `go ahead`, or `complete the track` alone.
+- An explicit current user instruction to finish implementation with local commits satisfies commit authorization; do not ask again. It does not authorize push or deployment.
 - Stage only inspected files or hunks owned by the active Track and verify the staged diff.
 - Do not create empty commits or mix unrelated changes.
 - Suggested messages may be reported without committing.
@@ -148,6 +149,8 @@ Authorization is not inherited across rows. Auto Mode controls continuation and 
 - Track finalization is a dedicated unit with two corrective and two review-fix cycles; it begins only after all implementation units are accepted.
 - A review-fix Work Order gets one corrective cycle and does not reset the parent count.
 - Creating a new Session, Work Order, phase, or module does not reset an exhausted unit budget.
+- Reaching the limit is a hard `blocked` or `partial` stop. A child, Reviewer, repeated validation, or redispatch cannot extend it.
+- Only the current user may explicitly approve a larger limit for a named finding or risk. Record the approval and new limit; the Coordinator cannot extend `2/2` to `3/3` or `4/4` itself.
 
 ## Cleanup Contract
 

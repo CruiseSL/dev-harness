@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "ses_f9fdffd2cffeXsh0QaXGJx3GIX",
+  "evidenceType": "user-supplied qualitative regression evidence",
+  "wallClock": "29h56m",
+  "assistantProcessing": "8h39m",
+  "toolChildPolling": "7h02m",
+  "messageCount": 427,
+  "runLikeResultsApprox": 33,
+  "successfulValidationBatches": 59,
+  "observations": [
+    "An internal one-recipient canary email was classified as Track and grew to about 1,983 lines of production code plus four test files before deletion was chosen.",
+    "Track review/fix budgets expanded from 2/2 to 3/3 and 4/4.",
+    "A one-line mock expectation fix created another Work Order and validation loop.",
+    "Bookkeeping-only plan and metadata edits were delegated and encountered certificate and nested-session failures.",
+    "Broad tests, build, lint, format, coverage, Wrangler, and D1 checks repeated for the same task.",
+    "Provider polling and Cloudflare account, environment, and secret blockers were repeatedly wrapped in new Work Orders.",
+    "No recursive Dev Harness Skill loading was observed; normal process weight was the primary problem."
+  ]
+}

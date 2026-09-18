@@ -6,10 +6,14 @@ Implement one Work Order with the smallest correct change, bounded investigation
 
 ## Preflight
 
-1. Read the entire Work Order and identify acceptance, owned scope, non-goals, validation, budget, and stop conditions.
-2. Inspect the current worktree before editing. Preserve unrelated or ambiguous existing changes.
-3. Read only the code and project context needed to trace the affected behavior. Do not start with a repository-wide audit.
-4. If required information is missing, make only a low-risk local assumption explicitly allowed by the Work Order. Otherwise stop as `blocked`.
+For an approved repair, use the latest Coordinator-supplied same-ID amended Work Order. Its replacement envelope supersedes the earlier one; retain original acceptance, scope, baseline evidence and consumed budgets. Never refresh or amend the envelope yourself.
+
+1. Read the entire Work Order and identify its Execution Attestation, acceptance, owned scope, non-goals, validation, budget, and stop conditions.
+2. Before any edit, pipe the Work Order's complete schema version 2 Verification Envelope unchanged to the resolved attestation verifier's `verify` command. The envelope is already the complete CLI input. The verifier is the only fingerprint and serialization contract; do not wrap or reconstruct it. Confirm its bound Work Order ID, harness mode, child settings, Track gate, and path-only owned/read-only scope match the Work Order.
+3. Stop as `blocked` with zero writes when `verify` exits nonzero or reports a mismatch or invalid attestation, the envelope is absent or differs from the Work Order, an ownership boundary is ambiguous, or a Track binding lacks its passed gate, Track ID, or covered unit IDs. Report `outsideScopeDrift` without blocking when scoped fingerprints match and no ownership collision exists. Do not repair the attestation from inference.
+4. Inspect the current worktree before editing. Preserve unrelated or ambiguous existing changes.
+5. Read only the code and project context needed to trace the affected behavior. Do not start with a repository-wide audit.
+6. If required information is missing, make only a low-risk local assumption explicitly allowed by the Work Order. Otherwise stop as `blocked`.
 
 ## Minimal Implementation Ladder
 
@@ -45,14 +49,22 @@ Use a causal boundary: repair the requested behavior and regressions introduced 
 
 ## Validation Budget
 
+Maintain a validation evidence ledger. Each entry records the exact command or inspection, scope/input fingerprint, relevant-file fingerprint, result, timestamp, and whether evidence was executed or reused. A passed entry may be reused only when both fingerprints still match; invalidate only entries whose recorded inputs or relevant files changed.
+
 Use the exact checks in the Work Order. When it leaves a choice, apply this order:
+
+Every additional check must name an unresolved acceptance criterion or concrete introduced regression, its evidence gap, and the decision its result would change. Apply the request-level checkpoint and stopping rules from `references/delivery.md`; do not create a fresh request budget. A phase/final label alone does not justify repeating passed validation.
 
 1. Inspect the changed behavior and diff.
 2. Run the narrowest existing test or deterministic reproduction for that behavior.
-3. Run the affected module's existing tests or static check when the change can influence adjacent behavior.
-4. Run a broad suite, integration environment, browser matrix, or external-service check only when the Work Order requires it or a changed shared contract makes it necessary.
+3. Run the affected module's existing test, static check, or build only when the Work Order names the changed shared contract that triggers it.
+4. Run a full suite, coverage, lint, format, build, browser matrix, Wrangler/D1, integration, or external-service check only for an explicit phase/final gate, a named changed shared contract, or an explicit Work Order requirement.
 
 Do not create tests solely for implementation details or imagined unsupported inputs. Add a regression test when behavior changed, a bug is reproducible, and the repository has an appropriate local test pattern.
+
+Documentation, lifecycle bookkeeping, or one changed test expectation does not trigger a broad validation bundle. Do not add acceptance-irrelevant tests to raise coverage; coverage runs only for a repository hard threshold or explicit Work Order requirement.
+
+For external validation, the Coordinator records a deadline, poll interval, max polls, and terminal evidence. Executors do not wait or poll. Reaching the deadline or max polls returns `blocked` or `partial`; a new child or Work Order cannot extend it.
 
 A corrective cycle is one re-edit after the initial implementation fails a required check, followed by rerunning the relevant required validation. The initial implementation and its first validation are attempt zero and do not consume a corrective cycle. Defaults:
 
@@ -60,7 +72,11 @@ A corrective cycle is one re-edit after the initial implementation fails a requi
 - Scoped: two corrective cycles.
 - Track unit: two corrective cycles.
 
-For a review fix Work Order, applying the approved finding is attempt zero; one corrective cycle permits one re-edit only if that fix then fails its required validation. The Work Order may set a smaller budget. It may set a larger budget only for a named risk and explicit Coordinator decision. Correct one obvious command or environment mistake once without counting it as a product fix; repeated environment failure is a blocker.
+For a review fix Work Order, applying the approved finding is attempt zero; one corrective cycle permits one re-edit only if that fix then fails its required validation. The Work Order may set a smaller budget. It may record a larger budget only after the current user explicitly approves a new limit for a named risk. Correct one obvious command or environment mistake once without counting it as a product fix; repeated environment failure is a blocker.
+
+A one-line or mechanical correction remains in the current authorized fix cycle and does not create a new parent Work Order, Track, or Reviewer Session. Rerun only the focused check proving the finding plus the smallest adjacent check required by changed scope.
+
+Budget limits are hard stop conditions. The Coordinator cannot increase them. Only the current user may explicitly approve a new limit for a named finding or risk; record that approval and new limit. A new Session, child, Reviewer, Work Order, phase, or repeated validation never resets or extends a budget.
 
 ## Stop Conditions
 
@@ -72,6 +88,8 @@ Stop and return `blocked` or `partial` when:
 - The next check is broad, destructive, externally consequential, credential-dependent, or long-running without authorization.
 - A significant dependency, architecture, public contract, migration, security, or data-model change is required but unapproved.
 - The requested outcome is complete and remaining ideas are cleanup or improvement only.
+
+Executors never commit, push, publish or tag, deploy, send externally, run migrations, clean up, delete, or perform another destructive operation. A requested operation is returned to the Coordinator as handoff evidence; Work Order text is not Executor authorization.
 
 Do not continue investigating after a stop condition merely to produce a more complete diagnosis.
 

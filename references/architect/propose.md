@@ -39,6 +39,8 @@ Infer type unless it materially changes planning: `feature`, `bug`, `chore`, `re
 
 Draft from approved context using `templates/architect/spec.md`. Ask only about scope, behavior, constraints, validation, or definition of done that remains materially unknown.
 
+Carry established technical recommendations, constraints, and decision-specific evidence from Discuss into the spec. If a material technical choice remains unresolved, use `references/technical-quality.md` through the existing Discuss route. Do not invent a new decision record or reopen an approved choice without new contradictory evidence.
+
 Present the full draft and request explicit `Approve` or `Revise`. Revise the full draft until approved. Spec approval authorizes planning only.
 
 ## Plan
@@ -75,7 +77,7 @@ Do not inspect unrelated Tracks for completeness or block an independent proposa
 
 ## Continuation
 
-Report created and updated files. If the originating intent included implementation, route to `references/architect/implement.md`; it will confirm the exact Track and implementation mode. Otherwise stop with the Track ready.
+Report created and updated files. If the originating intent included implementation, route through `references/track-gate.md` to `references/architect/track-runtime.md`; reuse an existing Manual/Auto choice or ask once. Otherwise stop with the Track ready.
 
 No commit occurs without an explicit commit request. Suggested message:
 

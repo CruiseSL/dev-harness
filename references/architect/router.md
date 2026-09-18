@@ -25,7 +25,7 @@ Apply the first matching route:
 | Track request with incomplete core context                     | `references/architect/setup.md`                       |
 | Track request with material unresolved direction               | `references/architect/discuss.md`                     |
 | Track request with stable scope but no matching approved track | `references/architect/propose.md`                     |
-| Implement, continue, or resume one valid approved track        | `references/architect/implement.md`                   |
+| Implement, continue, or resume one valid approved track        | `references/architect/track-runtime.md`               |
 | Malformed or conflicting durable artifacts                     | Stop with `blocked`; status may report but not repair |
 
 Do not route ordinary local coding through Architect merely because `architect/` exists.
@@ -37,7 +37,7 @@ Track candidate
   -> core ready? no -> setup
   -> material direction unresolved? yes -> discuss
   -> approved matching track exists? no -> propose
-  -> implementation requested? yes -> implement
+  -> implementation requested? yes -> track runtime
   -> final track review
   -> accepted | blocked | partial | cancelled
 ```
@@ -75,7 +75,7 @@ Use `references/architect/contracts.md` for the canonical core-readiness, regist
 
 - Missing or incomplete core artifacts route to Setup for Track work.
 - Missing management artifacts are recoverable only by Propose after spec and plan approval.
-- A valid unique matching track routes to Implement when implementation is requested.
+- A valid unique matching track routes to the Track runtime when implementation is requested.
 - A completed track requires explicit reopening confirmation.
 - Duplicate, unsafe, or malformed entries block mutation; do not guess a repair.
 
@@ -92,13 +92,13 @@ Do not ask `Which Architect skill should I use?` or expose controller selection.
 
 ## Track Unit Execution
 
-Implement treats one plan task, one actionable sub-task, or one phase gate as a Track unit.
+The compact runtime path treats one plan task, one actionable sub-task, or one phase gate as a Track unit. The long-form `references/architect/implement.md` remains canonical audit and reference material; it is not a Track runtime dependency.
 
-1. The Coordinator passes the Track Delegation Gate in `references/orchestration.md` before any unit state or file edit.
+1. The Coordinator selects local or delegated work through `references/track-gate.md`, checking ownership first and the Track Delegation Gate only for delegation.
 2. Architect lifecycle selects and marks the unit.
-3. The Coordinator creates a Work Order mapped to that unit with resolved child configuration and its direct or named-Agent dispatch route.
-4. An Executor, never the Coordinator current Session, performs the bounded change under `references/execution.md` through the resolved direct or named-Agent route.
-5. The Reviewer applies `references/review.md` to the cumulative unit diff.
+3. The Coordinator uses the existing plan/checklist locally, or creates a Work Order for a complete delegated deliverable with explicit role settings.
+4. The Coordinator or assigned Executor performs the bounded change through `references/architect/track-runtime.md`; keep one owner through implementation and fixes.
+5. After local implementation evidence or an Executor Result, the Coordinator or independent Reviewer applies `references/review.md` to the cumulative unit diff.
 6. Architect lifecycle records acceptance and selects the next unit.
 
 Auto Mode continues across accepted units. Manual Mode pauses only at configured phase gates. A failed unit does not reset its corrective or review-fix budget by being redispatched.

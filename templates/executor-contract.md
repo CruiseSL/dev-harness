@@ -1,14 +1,3 @@
----
-description: Executes bounded Dev Harness Work Orders with the project-selected child model and reasoning depth.
-mode: subagent
-model: <childAgent.model>
-variant: <childAgent.reasoning>
-permission:
-  skill: deny
-  task: deny
-  question: deny
----
-
 Execute only the supplied Dev Harness Work Order. Treat it as authoritative for scope, acceptance, validation, stop conditions, and the Execution Attestation.
 
 Before any edit, pipe the Work Order's complete, unmodified schema version 2 Verification Envelope directly to the Work Order's resolved attestation verifier with the `verify` command. The envelope is already the complete CLI input; do not wrap, reorder, or reconstruct it. The verifier is the only fingerprint and serialization contract. Require it to bind the Work Order ID, harness mode, concrete child model, reasoning, Agent and configuration source, requested consequential operations, and a passed Track ID plus every covered unit ID for Track work.

@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 2,
+  "name": "Dev Harness v2.5 static baseline",
+  "version": "2.5.0",
+  "revision": "9d88df9814e303046d7ff05e9cf42b31af2e10bb",
+  "package": {
+    "fileCount": 32,
+    "registeredSkills": 1
+  },
+  "sourceHashes": {
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "NOTICE": "5d0b612fc51f84a93fd6e74cdaef088cf37a5f5d5093356e542c77303309da3e",
+    "README.md": "81c32ff520dc63b27ec2f67b09f2a364c8bb07de64cb25809c3c851b90aeae64",
+    "SKILL.md": "bc14c52f9f5966e7544f4fabfbe072033adc01e61cacb499225b7ae17ff28f61",
+    "references/architect/contracts.md": "ef3d2d43e4c30c31c16b38379cda5e8c6a01f08d12f95134a2c080bf2120e314",
+    "references/architect/defaults/code-style.md": "5f751ba40040d9ee654717953f4ea1ec9d15683b86f75db561d0cc1d41c6f583",
+    "references/architect/defaults/delivery.md": "2510877b7a64040ac3fb48269f051ac1b56cc996678caeaaabb1d0703ce8e899",
+    "references/architect/discuss.md": "11af3e3998ae4dfd576ff29d40ca3406e2573cb8d68904d40028726b383a8226",
+    "references/architect/implement.md": "597caaa80e470e6b85fc7e86ba8a2a2c8310ccfb971815e6cfa21270e8ee3c2a",
+    "references/architect/propose.md": "18b51824306077789749600b97c972b7d6e59667bfde1ffe03af657c33af52c2",
+    "references/architect/review.md": "fc18c3c27305740a52d302034cfaa5fd25dfb88e8ca781e2e30f885d56071e4d",
+    "references/architect/router.md": "aa53730580d9400b6916d325cd5526d60f702074fff284c83c1bb3112328b9d8",
+    "references/architect/setup.md": "8df0c4374e13e9cde654329c7e8dbb30378710d7d27a675d6f2dd340b4afa827",
+    "references/architect/status.md": "2d3be1a126bb050c7ce768f529093692f9b73140c3834909e88b4e178b292914",
+    "references/classification.md": "7e47241640e06b5e73be460a49233d0da3866c29d1e00f1729c3934abdd76ec3",
+    "references/execution.md": "38e550cc70a5227d6ff5fc28bf2e63555c341c00ffb39d53f761a430559709a6",
+    "references/orchestration.md": "d7e59da841b8a67712d37580f0adf54662fd4541e6aeb1e4a1212fa4c30d4dda",
+    "references/review.md": "e217570b7d0cc1eace108a17cbf981c451d845f4c70383cb3b4b83b2855bb5c8",
+    "references/validation-scenarios.md": "c748022f33b5f3d8c9e8acd7b5c2762aff5174cb39bc83ec37444b046aa3addc",
+    "templates/architect/core-index.md": "9b3ff667813ab08afdfcdc3d6a5ec4807fd036412129e30893020f41f848140a",
+    "templates/architect/discussion.md": "0306f74b7f65db0ca0befabba26533e3f6154204474a7c92821482b56b9f2a76",
+    "templates/architect/management-section.md": "ce43ac1b2c0d56b81f6a54320139ea407596327b7a966712d9817071fd155c6d",
+    "templates/architect/metadata.md": "206de1de1e98c067c4f90c8fc396a73fbc1b2c5ca6c263137a3348091579b6c1",
+    "templates/architect/plan.md": "27ae4c0a4c5fae680c49677e130021486353a672144657108e40d2a5628bb718",
+    "templates/architect/registry-entry.md": "cc033d67dfcd1e547174a932b65ddbd872ac2658e63540d87f93f71f2043480f",
+    "templates/architect/spec.md": "5fdf98549faa10ebb368f0e1a0dc2f7183993e46c1530216f7c514b3d11bc20e",
+    "templates/architect/track-index.md": "0fba3e42bfe0baea0dd07019b52161bed033ee44853b608460c73e503fae84b2",
+    "templates/architect/tracks.md": "c9d7c0b12182b0685efff44ccfffaffbb28a3c7d124dbd5bfb9cd676c5b65fe6",
+    "templates/opencode-worker.md": "b44fbd0cbdfe5a14d3bb0e4f34340ba5498956a10e0eb432da28ac17d4952654",
+    "templates/result.md": "f717a652a14a6e27b17a70dcd112379292362c2d0ed77c8612126c99d21abec5",
+    "templates/work-order.md": "d0084a28aa72365dda685c62e8fae7e03d656ead5af474aef7b3ec19414008a8",
+    "tests/validate.mjs": "1204ea885600338d14fc6cfdc823ae5a01e11e3ea896cdab963bbcd4c0d691f9"
+  },
+  "routes": {
+    "explicit-status": {
+      "protocolBytes": 29943,
+      "files": [
+        "SKILL.md",
+        "references/architect/contracts.md",
+        "references/architect/router.md",
+        "references/architect/status.md",
+        "references/classification.md"
+      ],
+      "unnecessary": [
+        "references/classification.md"
+      ],
+      "coordinatorFiles": ["SKILL.md", "references/architect/contracts.md", "references/architect/router.md", "references/architect/status.md", "references/classification.md"],
+      "templateFiles": [],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 29943,
+      "workerSystemBytes": 0,
+      "templateBytes": 0,
+      "combinedStaticBytes": 29943,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 20960
+    },
+    "explicit-review-current-diff": {
+      "protocolBytes": 26678,
+      "files": [
+        "SKILL.md",
+        "references/architect/review.md",
+        "references/architect/router.md",
+        "references/classification.md",
+        "references/review.md"
+      ],
+      "unnecessary": [
+        "references/classification.md"
+      ],
+      "coordinatorFiles": ["SKILL.md", "references/architect/review.md", "references/architect/router.md", "references/classification.md", "references/review.md"],
+      "templateFiles": [],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 26678,
+      "workerSystemBytes": 0,
+      "templateBytes": 0,
+      "combinedStaticBytes": 26678,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 18674
+    },
+    "quick-single-file-change": {
+      "protocolBytes": 37512,
+      "files": [
+        "SKILL.md",
+        "references/classification.md",
+        "references/execution.md",
+        "references/orchestration.md",
+        "references/review.md",
+        "templates/opencode-worker.md",
+        "templates/result.md",
+        "templates/work-order.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/classification.md", "references/execution.md", "references/orchestration.md", "references/review.md"],
+      "templateFiles": ["templates/result.md", "templates/work-order.md"],
+      "workerFiles": ["templates/opencode-worker.md"],
+      "coordinatorProtocolBytes": 32833,
+      "workerSystemBytes": 634,
+      "templateBytes": 4679,
+      "combinedStaticBytes": 38146,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 26702
+    },
+    "quick-unrelated-dirty-worktree": {
+      "protocolBytes": 37512,
+      "files": [
+        "SKILL.md",
+        "references/classification.md",
+        "references/execution.md",
+        "references/orchestration.md",
+        "references/review.md",
+        "templates/result.md",
+        "templates/work-order.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/classification.md", "references/execution.md", "references/orchestration.md", "references/review.md"],
+      "templateFiles": ["templates/result.md", "templates/work-order.md"],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 32833,
+      "workerSystemBytes": 0,
+      "templateBytes": 4679,
+      "combinedStaticBytes": 37512,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 26258
+    },
+    "scoped-cross-module-change": {
+      "protocolBytes": 37512,
+      "files": [
+        "SKILL.md",
+        "references/classification.md",
+        "references/execution.md",
+        "references/orchestration.md",
+        "references/review.md",
+        "templates/opencode-worker.md",
+        "templates/result.md",
+        "templates/work-order.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/classification.md", "references/execution.md", "references/orchestration.md", "references/review.md"],
+      "templateFiles": ["templates/result.md", "templates/work-order.md"],
+      "workerFiles": ["templates/opencode-worker.md"],
+      "coordinatorProtocolBytes": 32833,
+      "workerSystemBytes": 634,
+      "templateBytes": 4679,
+      "combinedStaticBytes": 38146,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 26702
+    },
+    "scoped-no-explicit-child-selection": {
+      "protocolBytes": 37512,
+      "files": [
+        "SKILL.md",
+        "references/classification.md",
+        "references/execution.md",
+        "references/orchestration.md",
+        "references/review.md",
+        "templates/result.md",
+        "templates/work-order.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/classification.md", "references/execution.md", "references/orchestration.md", "references/review.md"],
+      "templateFiles": ["templates/result.md", "templates/work-order.md"],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 32833,
+      "workerSystemBytes": 0,
+      "templateBytes": 4679,
+      "combinedStaticBytes": 37512,
+      "targetReductionPercent": 30,
+      "candidateBudgetBytes": 26258
+    },
+    "track-missing-child-configuration": {
+      "protocolBytes": 46406,
+      "files": [
+        "SKILL.md",
+        "references/architect/contracts.md",
+        "references/architect/implement.md",
+        "references/architect/router.md",
+        "references/classification.md",
+        "references/orchestration.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/architect/contracts.md", "references/architect/implement.md", "references/architect/router.md", "references/classification.md", "references/orchestration.md"],
+      "templateFiles": [],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 46406,
+      "workerSystemBytes": 0,
+      "templateBytes": 0,
+      "combinedStaticBytes": 46406,
+      "targetReductionPercent": 25,
+      "candidateBudgetBytes": 34804
+    },
+    "track-named-agent-mismatch": {
+      "protocolBytes": 46406,
+      "files": [
+        "SKILL.md",
+        "references/architect/contracts.md",
+        "references/architect/implement.md",
+        "references/architect/router.md",
+        "references/classification.md",
+        "references/orchestration.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/architect/contracts.md", "references/architect/implement.md", "references/architect/router.md", "references/classification.md", "references/orchestration.md"],
+      "templateFiles": [],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 46406,
+      "workerSystemBytes": 0,
+      "templateBytes": 0,
+      "combinedStaticBytes": 46406,
+      "targetReductionPercent": 25,
+      "candidateBudgetBytes": 34804
+    },
+    "track-matching-named-agent": {
+      "protocolBytes": 65009,
+      "files": [
+        "SKILL.md",
+        "references/architect/contracts.md",
+        "references/architect/implement.md",
+        "references/architect/review.md",
+        "references/architect/router.md",
+        "references/classification.md",
+        "references/execution.md",
+        "references/orchestration.md",
+        "references/review.md",
+        "templates/opencode-worker.md",
+        "templates/result.md",
+        "templates/work-order.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/architect/contracts.md", "references/architect/implement.md", "references/architect/review.md", "references/architect/router.md", "references/classification.md", "references/execution.md", "references/orchestration.md", "references/review.md"],
+      "templateFiles": ["templates/result.md", "templates/work-order.md"],
+      "workerFiles": ["templates/opencode-worker.md"],
+      "coordinatorProtocolBytes": 60330,
+      "workerSystemBytes": 634,
+      "templateBytes": 4679,
+      "combinedStaticBytes": 65643,
+      "targetReductionPercent": 25,
+      "candidateBudgetBytes": 49232
+    },
+    "standalone-brainstorming": {
+      "protocolBytes": 17645,
+      "files": [
+        "SKILL.md",
+        "references/architect/router.md",
+        "references/classification.md"
+      ],
+      "unnecessary": [],
+      "coordinatorFiles": ["SKILL.md", "references/architect/router.md", "references/classification.md"],
+      "templateFiles": [],
+      "workerFiles": [],
+      "coordinatorProtocolBytes": 17645,
+      "workerSystemBytes": 0,
+      "templateBytes": 0,
+      "combinedStaticBytes": 17645,
+      "targetReductionPercent": 0,
+      "candidateBudgetBytes": 17645
+    }
+  },
+  "safetyOutcomes": {
+    "worker-denies-nested-task": "pass",
+    "worker-denies-user-question": "pass",
+    "worker-denies-recursive-skill-load": "fail",
+    "track-gate-precedes-track-writes": "pass",
+    "review-remains-read-only": "pass",
+    "commit-requires-current-conversation-authorization": "pass",
+    "unapproved-external-and-destructive-actions-stop": "pass"
+  },
+  "knownFindingIds": [
+    "safety:worker-denies-recursive-skill-load",
+    "unnecessary-route-dependency:explicit-review-current-diff:references/classification.md",
+    "unnecessary-route-dependency:explicit-status:references/classification.md"
+  ]
+}

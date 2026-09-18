@@ -23,21 +23,22 @@ Use Quick when all material facts are clear and the change is local, reversible,
 
 Quick defaults:
 
-- One compact Work Order.
-- Economical Executor profile when delegation is useful and available.
+- One compact in-memory Coordinator checklist, not a full Work Order document.
+- Current Session execution and local review; zero child dispatches by default.
+- A child only for explicit user-requested isolation or a concrete recorded safety or independence reason.
 - Focused validation only.
 - At most one review-fix cycle.
 - No Architect artifacts and no persistent task document unless requested.
 
 ### Scoped
 
-Use Scoped when the outcome is clear but implementation crosses modules, changes internal behavior or contracts, has moderate uncertainty, or benefits from explicit boundaries and acceptance checks.
+Use Scoped when the outcome is clear but implementation has moderate risk or uncertainty, crosses a trust boundary, or benefits from explicit boundaries and acceptance checks. Crossing two files or modules alone does not require delegation or Track.
 
 Scoped defaults:
 
-- One full Work Order, split only when independent ownership or verification boundaries are clear.
-- Deep Executor profile only when uncertainty justifies it; otherwise use the economical profile.
-- Targeted tests plus the smallest relevant static or build check.
+- One bounded Coordinator execution pass by default.
+- A child only for a cross-trust boundary, independent worktree, significant technical uncertainty, or explicit user request.
+- Focused behavior validation; run an adjacent static or build check only for a named shared-contract trigger.
 - At most two review-fix cycles.
 - No Architect track unless durable multi-slice coordination is actually needed.
 
@@ -49,14 +50,21 @@ Track defaults:
 
 - One durable built-in Architect Track for the initiative.
 - Automatic Setup, Discuss, Propose, Implement, Review, and Status routing as required by evidence and intent.
-- Multiple bounded Work Orders mapped to approved plan units, each with the Scoped two-cycle limit.
+- Complete deliverables mapped to approved plan units, each with the Scoped two-cycle limit. Small units may execute locally; delegated deliverables keep one Executor through implementation, tests and fixes.
 - Architect artifacts own durable specification, plan, status, and project-context synchronization; Dev Harness remains the single implementation controller.
+- Merge adjacent plan units into one Work Order only when ownership, acceptance, validation, and rollback boundaries are identical.
 
 ## Decision Rule
 
 Choose the lowest level whose controls cover every material risk. Do not upgrade merely because the repository is large, the model can imagine edge cases, or validation tools are available.
 
+An unresolved stack/dependency choice, changed data or service boundary, or disputed engineering feedback triggers `references/technical-quality.md`. The Coordinator recommends a path using repository evidence and business constraints. The user's technical experience does not determine the level. A settled design or a small change using existing patterns needs no new comparison, decision document, or approval; technical assessment alone creates no Track.
+
 Touching a security, persistence, or data-integrity code path does not by itself require Track. A bounded fix that preserves the existing contract may be Quick or Scoped with proportionate review. Use Track when the contract, policy, schema, migration, rollout, or durable project coordination changes.
+
+Sending one canary message to one explicitly named internal recipient is Scoped when it introduces no public contract, migration, persistence policy, security policy, or architecture decision. The external send still requires exact current-conversation authorization; that approval boundary does not by itself make the implementation a Track.
+
+Do not create a new Track merely because a small correction belongs to an existing Track. A single configuration correction, one-line test expectation fix, or lifecycle bookkeeping update stays in its current authorized unit or Coordinator lifecycle step.
 
 Announce the result using:
 

@@ -4,9 +4,9 @@
 
 ## Purpose
 
-Implement or resume one approved Track by selecting one plan unit at a time, delegating it through Dev Harness, maintaining durable state, verifying every phase, synchronizing context, and completing final review.
+Implement or resume one approved Track by selecting one plan unit at a time, executing it locally or delegating a complete deliverable through Dev Harness, maintaining durable state, verifying every phase, synchronizing context, and completing final review.
 
-Read `references/architect/contracts.md`, `references/architect/router.md`, `references/execution.md`, and `references/review.md` before implementation.
+Runtime entry is `references/track-gate.md` then `references/architect/track-runtime.md`. This document explains the same lifecycle for maintenance; do not load it as a second execution controller or eagerly load later review stages.
 
 ## Preconditions
 
@@ -51,30 +51,34 @@ Registry, metadata, parent tasks, sub-tasks, and phase gates follow `references/
 5. For `task` granularity, execute the parent and its nested details as one unit.
 6. A malformed declaration, mixed grammar, or unrecognized unfinished checkbox structure blocks mutation.
 
+Adjacent pending units may be merged into one bounded Work Order only when they have identical ownership, acceptance, validation, and rollback boundaries. Any mismatch keeps them separate. Record every merged plan unit in the Work Order and preserve each unit's status transition.
+
+Registry markers, plan checkboxes, metadata, summaries, and budget ledgers are lifecycle bookkeeping owned by the Coordinator. Update them directly after the relevant gate; never dispatch a bookkeeping-only child. An Executor handles only implementation or independently valuable validation.
+
 ## Track Delegation Gate
 
-Before marking the first unit that the current Session executes for this Track active, creating its Work Order, or editing any Track or implementation file, apply `references/orchestration.md`'s Track Delegation Gate.
+First select local or delegated execution. The Coordinator may execute a small bounded Track unit locally after checking ownership. Apply `references/orchestration.md`'s Track Delegation Gate only before child dispatch.
 
 - Read the valid project-local child configuration first.
 - When it is absent, legacy, incomplete, or unsupported, ask for the concrete child model, reasoning value, and reuse scope, then pause with the Track `blocked`.
 - When dispatch uses a named host Agent, verify that it is loaded as a child and pins the exact configured model and reasoning or variant value. Invoke that Agent by name for the Work Order.
 - Do not use an earlier current-Session choice from Quick work, Scoped work, or another Track, a host default, main Session model, or internal profile to bypass the question for the first Track unit in this Session.
-- Do not execute a Track unit in the current Session. An unavailable explicit child model or reasoning selection blocks the unit instead of allowing a current-Session fallback.
+- Do not silently replace a required independent Executor with the Coordinator. Missing explicit child settings block that dispatch, not unrelated authorized local work.
 
-The gate must pass before any Track state, Work Order, or implementation edit. A `Current Project` response writes the configuration before dispatch; a `Current Session` response may be reused only for later units of this Track in this Session after the initial gate has passed.
+The gate must pass before delegated Work Order creation or child edits. A `Current Project` response writes the configuration before dispatch; a `Current Session` response may be reused only for later units of this Track in this Session after the initial gate has passed.
 
 ## Unit Execution
 
 For each selected unit:
 
-1. Confirm the Track Delegation Gate has passed.
-2. Persist the parent and selected sub-task state as active before implementation edits.
-3. Create a self-contained Track Work Order from `templates/work-order.md` containing the Track ID, plan unit, relevant spec acceptance, owned files, non-goals, validation, budget, and resolved child configuration source.
-4. Delegate through `references/orchestration.md`. The Executor must not edit Architect artifacts unless the Work Order explicitly assigns a precise lifecycle write.
+1. Confirm local ownership or that the Track Delegation Gate has passed for delegation.
+2. The Coordinator persists the parent and selected sub-task state as active before implementation edits.
+3. For delegation, create a self-contained Track Work Order from `templates/work-order.md` containing the Track ID, plan unit, relevant spec acceptance, owned files, non-goals, validation, budget, and resolved child configuration source.
+4. Execute a small local unit from its plan/checklist, or delegate through `references/orchestration.md`. Reuse the same Executor for implementation, tests and repairs. Never concurrently edit its owned files. The Executor must not edit Architect artifacts unless explicitly assigned.
 5. Apply `references/execution.md` with the smallest correct implementation and Track-unit budget.
 6. Review the cumulative unit diff under `references/review.md` plus the Track spec, plan, project context, and style guides.
 7. Apply only authorized Blocking fixes within the unit budget.
-8. On acceptance, mark the unit complete and record a concise summary plus an explicitly authorized short commit SHA or `no-commit`.
+8. On acceptance, the Coordinator marks every covered unit complete and records a concise summary plus an explicitly authorized short commit SHA or `no-commit`.
 9. Rescan the phase before selecting later work.
 
 Auto Mode continues to the next unit after acceptance. Task size alone is not a stop condition, but every unit remains bounded and independently reviewed.
@@ -86,6 +90,7 @@ Treat a phase gate as its own Track unit with two corrective and two review-fix 
 1. Mark the gate active.
 2. Identify phase-changed behavior and corresponding tests.
 3. Run the smallest phase-level automated checks required by the plan and delivery policy.
+   Reuse valid unit evidence; a phase gate runs only missing or invalidated checks. Its label does not authorize a fresh broad suite.
 4. Generate concrete manual verification from product context and phase acceptance.
 5. Manual Mode waits for confirmation.
 6. Auto Mode executes feasible browser, CLI, API, test, or inspection substitutes and records limitations.
@@ -111,7 +116,7 @@ After all status-managed units and phase gates are complete:
 8. Only after documentation synchronization, required checks, and final review pass, mark the registry `[x]`, set metadata to `completed`, and refresh `updated_at`.
 9. Report accepted completion only after the completed durable state is validated. A blocker before step 8 leaves the Track `in_progress`.
 
-Implementation does not authorize a commit. When the user explicitly requests one, stage only inspected Track-owned files and hunks, inspect the staged diff, run the repository's staged-diff check, commit, and verify. Suggested final message:
+Implementation does not authorize a commit by itself. A current user instruction requiring local commits is explicit standing authorization for this task. When authorized, stage only inspected Track-owned files and hunks, inspect the staged diff, run the repository's staged-diff check, commit, and verify. Suggested final message:
 
 ```text
 architect(implement): complete track <track_id>

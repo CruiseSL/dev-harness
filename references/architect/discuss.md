@@ -49,6 +49,8 @@ Each gate is `Passed`, `Needs input`, or `Deferred`, with pass mode `Explicit`, 
 
 ## Analysis Shape
 
+For material technical choices, apply `references/technical-quality.md` within this discussion. Recommend a justified option and translate consequences into business terms; reuse an established decision without starting another gate.
+
 1. Intake any earlier brainstorming synthesis or relevant conversation, then build shallow targeted context from Architect core, relevant Tracks, direct code/docs, APIs, schemas, and service boundaries.
 2. Stabilize problem, users, value, goals, non-goals, success, and affected domains.
 3. Split separable initiatives and identify one proposal-sized unit.

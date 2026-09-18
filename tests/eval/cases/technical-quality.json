@@ -1,0 +1,35 @@
+{
+  "evidenceType": "manual-host-behavior-cases",
+  "cases": [
+    {
+      "id": "ordinary-copy",
+      "request": "Change the retry label to Retry, preserving the export and existing patterns. Run its focused check.",
+      "expected": ["Quick current-session change", "No technical-quality pack or architecture comparison", "No new document, dependency, or approval", "Acceptance and focused-check evidence"]
+    },
+    {
+      "id": "material-choice",
+      "request": "Our small internal reporting service needs durable storage. Read the project constraints and recommend an approach with reasons and maintenance implications. Advice only; do not edit or deploy.",
+      "expected": ["Load technical-quality pack", "Read relevant project facts", "Recommend one feasible approach and explain a viable alternative", "Check every stated business requirement; distinguish a daily backup from a required restore point", "Explain business consequences and verification gaps", "No invented scale, prices, new Track, edits, or deployment"]
+    },
+    {
+      "id": "settled-design",
+      "request": "Implement the approved parser fix using our existing library and exact agreed acceptance. No new dependency or architecture decision is open.",
+      "expected": ["Reuse approved design", "No new selection exercise or architecture approval", "Focused implementation and validation"]
+    },
+    {
+      "id": "feedback-with-real-defect",
+      "request": "Review this feedback against the diff: a user can retrieve another user's report by changing the ID; another comment asks for a more fashionable framework. Review only.",
+      "expected": ["Assess each concern against code and evidence", "Treat a demonstrated authorization defect as Blocking", "Do not equate framework popularity with a defect", "No edits under review-only authority"]
+    },
+    {
+      "id": "missing-business-fact",
+      "request": "Recommend how to store customer exports. Whether data may leave our environment has not been decided, and it changes which solution is allowed.",
+      "expected": ["Ask only for the missing material data-location decision", "Explain consequences of options", "Do not invent policy or ask user to choose a framework by name"]
+    },
+    {
+      "id": "standalone-ideation",
+      "request": "Brainstorm possible products for small retailers; no project or implementation has been chosen.",
+      "expected": ["Remain outside delivery lifecycle", "No technical-quality pack or mandatory stack selection", "No Track artifacts or implementation"]
+    }
+  ]
+}

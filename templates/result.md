@@ -19,13 +19,19 @@
 
 ## Validation
 
-| Check                     | Result                         | Evidence                   |
-| ------------------------- | ------------------------------ | -------------------------- |
-| `<command or inspection>` | `<passed, failed, or not run>` | <concise output or reason> |
+| Check | Scope/input fingerprint | Relevant-file fingerprint | Result | Time | Source | Evidence |
+| ----- | ----------------------- | ------------------------- | ------ | ---- | ------ | -------- |
+| `<command or inspection>` | `<hash>` | `<hash>` | `<passed, failed, blocked, or not run>` | `<UTC>` | `<executed|reused>` | <concise output or reason> |
 
 - **Corrective cycles used:** `<number>/<budget>`
 - **Parent review-fix cycle:** `<reserved/limit from the Work Order>`
 - **Broader validation:** `<not triggered|trigger and result>`
+- **Validation executions:** `<count>`
+- **Validation reuses:** `<count>`
+- **Broad checks:** `<count>`
+- **External polls:** `<Coordinator-owned count; Executor must return 0>`
+- **Request elapsed / first implementation complete:** `<observed times, or unavailable; keep the original request start>`
+- **Remaining acceptance / next check decision:** `<unmet criterion and missing evidence, or none: ready for review>`
 
 ## Discoveries
 

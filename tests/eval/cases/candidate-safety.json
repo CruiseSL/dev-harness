@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "worker-denies-nested-task",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "task",
+      "expected": "deny"
+    },
+    {
+      "id": "worker-denies-user-question",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "question",
+      "expected": "deny"
+    },
+    {
+      "id": "worker-denies-recursive-skill-load",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "skill",
+      "expected": "deny"
+    },
+    {
+      "id": "worker-blocks-attestation-mismatch",
+      "type": "contains-all",
+      "path": "templates/opencode-worker.md",
+      "includes": [
+        "Verification Envelope",
+        "reports any mismatch or invalid attestation",
+        "Reject the Work Order as `blocked` with zero writes"
+      ]
+    },
+    {
+      "id": "worker-never-executes-consequential-operations",
+      "type": "contains-all",
+      "path": "templates/opencode-worker.md",
+      "includes": [
+        "Do not commit, push, publish or tag, deploy, send externally, run a migration, clean up, delete, or perform another destructive action.",
+        "Return the requested operation to the Coordinator"
+      ]
+    },
+    {
+      "id": "work-order-records-content-fingerprints",
+      "type": "contains-all",
+      "path": "templates/work-order.md",
+      "includes": [
+        "### Verification Envelope",
+        "complete `envelope` object",
+        "schema version 2",
+        "already the complete stdin"
+      ]
+    },
+    {
+      "id": "execution-blocks-fingerprint-mismatch",
+      "type": "contains-all",
+      "path": "references/execution.md",
+      "includes": [
+        "complete schema version 2 Verification Envelope",
+        "reports a mismatch or invalid attestation",
+        "zero writes"
+      ]
+    },
+    {
+      "id": "track-gate-precedes-child-writes",
+      "type": "ordered-text",
+      "path": "references/orchestration.md",
+      "ordered": [
+        "## Track Delegation Gate",
+        "Before dispatching a delegated unit or allowing child writes:",
+        "Stop the delegated unit with `blocked`"
+      ]
+    },
+    {
+      "id": "review-remains-read-only",
+      "type": "contains-all",
+      "path": "references/review.md",
+      "includes": [
+        "Review is read-only by default.",
+        "The Coordinator decides which findings to fix."
+      ]
+    },
+    {
+      "id": "commit-requires-current-conversation-authorization",
+      "type": "contains-all",
+      "path": "references/architect/contracts.md",
+      "includes": [
+        "Any Git commit",
+        "Explicit commit request in the current conversation"
+      ]
+    },
+    {
+      "id": "unapproved-external-and-destructive-actions-stop",
+      "type": "contains-all",
+      "path": "references/execution.md",
+      "includes": [
+        "The next check is broad, destructive, externally consequential, credential-dependent, or long-running without authorization.",
+        "A significant dependency, architecture, public contract, migration, security, or data-model change is required but unapproved."
+      ]
+    }
+  ]
+}
