@@ -55,6 +55,8 @@ Record protocol reads, evidence reuse, test executions, edits, and the final dec
 
    Replace values only with observed evidence. Record `runtime` as an object with observed `host` (including version), `model`, and `reasoning` strings. Missing or mismatched runtime settings prevent speed comparison. `accepted` means the host actually concluded acceptance; preserve blocked/partial/cancelled outcomes. Null is unavailable, not zero. Count tool-level validations from the transcript, not model claims; repeated validation is another execution, while evidence reuse is not.
 
+   For speed comparison also record both `runtime.roles.executor` and `runtime.roles.reviewer`, each with observed `model` and `reasoning`, or explicitly null when unused. Missing role evidence or a role mismatch prevents comparison; historical observations remain readable. Optional observations `humanInterventionCount`, `modelResponseCount`, `noncachedInputTokens`, and `outputTokens` must come from session evidence; leave them null when unavailable. Sum across the participating sessions without double-counting cached input or cumulative usage snapshots. These are observed token counts, not billing estimates.
+
 5. Immediately assess the result:
 
    `node tests/eval/run-delivery.mjs assess /private/tmp/dev-harness-delivery-pilot-1 baseline-quick-label /private/tmp/observations.json`
@@ -75,4 +77,30 @@ The primary question is whether a completed task spends less time after its firs
 
 ## Track Runtime Maintenance Check
 
-Exercise these paths when Track routing changes: existing Auto choice resumes an active unit without prompting; earlier incomplete phase gate blocks later work; Manual waits at the agreed human gate; final review failure preserves in-progress state; successful final reconciliation marks registry/metadata consistently. Static assertions of these instructions are documentation checks, not real-host behavior evidence. A real Track pilot is still needed before claiming lifecycle equivalence.
+Exercise these paths when Track routing changes: an authorized implementation uses Auto unless Manual or a pause was already selected; a substantive earlier phase gate blocks dependent work; Manual waits at the agreed gate; final review failure preserves in-progress state; successful final reconciliation marks registry/metadata consistently. Include changed-evidence repairs beyond two cycles, an explicit user hard limit, one persistent developer batch covering different files/checks, and local implementation with independent review. Static assertions of these instructions are documentation checks, not real-host behavior evidence.
+
+## Optional Scheduled-Report Delivery Batch
+
+`node tests/eval/run-delivery.mjs prepare-batch /private/tmp/dev-harness-scheduled-pilot-1` prepares a baseline and candidate fixture without invoking any provider. The API also accepts `caseIds: ["scheduled-report-batch"]` and caller-selected source revisions; use the pre-change commit when isolating a particular workflow change rather than attributing all differences from v2.5 to it.
+
+This exercise joins configuration, data aggregation, the scheduled entrypoint, and handoff documentation in one owned batch. The independent probe enters through `scheduled()` using a timestamp with nonzero seconds, reads an injected source, checks the report, dry run, duplicate delivery and failed-send bookkeeping. All sends are local fakes. It catches the normal-entrypoint mismatch seen in the migration retrospective without creating a general boundary-test project.
+
+Use `start` and `assess` as above, and preserve the same developer through fixes. Record actual handoffs, review and user interventions. This is an implementation-batch exercise: it does not exercise every Architect lifecycle transition, real credentials, Cloudflare deployment, natural Cron wake-up, source permissions, or recipient delivery. The default three-case `compare` deliberately refuses to infer a speedup from this optional subset. Compare observed batch outcomes descriptively and report this limitation.
+
+Before claiming that the workflow fixes the original multi-day migration problem, run a representative authorized product task with the requested Astra / Luna / Sol settings. Predeclare its business completion tier and target-runtime evidence, verify the normal path early, and report total elapsed time, interventions, validation reuse, model responses, and uncached input/output across all agents. Do not substitute a faster fixed-output benchmark, fewer checklist rows, or this local fixture for that evidence.
+
+## Recoverable Input-Cost Runs
+
+Both `run-live.mjs` and `run-layered.mjs` still default to a dry run. Actual execution requires `--execute --journal <path>`; it fails before provider work if the journal is missing. These are optional OpenCode benchmarks, separate from native Codex role configuration. Supply the model and effort actually configured for that provider rather than assuming the historical CLI defaults match your host.
+
+For an explicitly chosen provider, a single-route invocation looks like:
+
+```sh
+node tests/eval/run-live.mjs --execute --model '<provider/model>' --variant '<effort>' --journal /private/tmp/harness-live/run.json --output /private/tmp/harness-live/result.json --json
+```
+
+Use the same arguments plus `--resume` to reuse recorded samples and continue unstarted calls. Recovery requires matching protocol contents, route, invocation order, model, effort and execution bounds. A completed failed sample remains a failure; recovery does not erase it or silently pay to retry it. An unresolved `inFlight` record means the last call's outcome is unknown and automatic replay is refused. Retain that evidence and inspect the interrupted invocation before deciding on a new run; do not delete the record to force recovery.
+
+`--timeout-ms` defaults to 120000 and `--max-output-bytes` to 4194304 per stream. SIGINT/SIGTERM request cancellation, with bounded escalation and pipe cleanup. The journal preserves per-call evidence; `--output` is a separate final summary and must not overwrite it.
+
+For a layered run, use a distinct base such as `--journal /private/tmp/harness-layered/run.json`. Before any provider calls, the tool creates the batch identity at `run.json.batch.json` and one `run.json.<route>.json` per route. Keep the whole set. The same invocation plus `--resume` can continue after an early-route cancellation without losing the later unstarted routes; a missing declared journal is an error. Changed protocol contents require a new experiment rather than mixing incompatible samples.

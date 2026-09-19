@@ -27,7 +27,7 @@ Quick defaults:
 - Current Session execution and local review; zero child dispatches by default.
 - A child only for explicit user-requested isolation or a concrete recorded safety or independence reason.
 - Focused validation only.
-- At most one review-fix cycle.
+- One review-fix count is a diagnostic checkpoint; it is not an automatic stop.
 - No Architect artifacts and no persistent task document unless requested.
 
 ### Scoped
@@ -39,7 +39,7 @@ Scoped defaults:
 - One bounded Coordinator execution pass by default.
 - A child only for a cross-trust boundary, independent worktree, significant technical uncertainty, or explicit user request.
 - Focused behavior validation; run an adjacent static or build check only for a named shared-contract trigger.
-- At most two review-fix cycles.
+- Two review-fix counts are a diagnostic checkpoint; they are not an automatic stop.
 - No Architect track unless durable multi-slice coordination is actually needed.
 
 ### Track
@@ -50,9 +50,9 @@ Track defaults:
 
 - One durable built-in Architect Track for the initiative.
 - Automatic Setup, Discuss, Propose, Implement, Review, and Status routing as required by evidence and intent.
-- Complete deliverables mapped to approved plan units, each with the Scoped two-cycle limit. Small units may execute locally; delegated deliverables keep one Executor through implementation, tests and fixes.
+- Complete coherent delivery batches mapped to approved plan units. A batch may include configuration/runtime, tests, documentation, and repairs when its acceptance union remains within scope, one owner has no active collision, and authorization, rollout, and rollback boundaries are compatible. Small batches may execute locally; delegated batches keep one Executor through implementation, tests and fixes.
 - Architect artifacts own durable specification, plan, status, and project-context synchronization; Dev Harness remains the single implementation controller.
-- Merge adjacent plan units into one Work Order only when ownership, acceptance, validation, and rollback boundaries are identical.
+- Merge adjacent plan units into one Work Order when the acceptance union remains within scope, ownership is singular with no active collision, and authorization, rollout, and rollback boundaries are compatible; validation may be combined when it still proves the union.
 
 ## Decision Rule
 

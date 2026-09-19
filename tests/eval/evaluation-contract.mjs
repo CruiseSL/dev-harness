@@ -10,7 +10,10 @@ export const evaluationContract = Object.freeze({
     "track-missing-child-configuration",
     "track-named-agent-mismatch",
     "track-matching-named-agent",
-    "standalone-brainstorming"
+    "standalone-brainstorming",
+    "track-local-execution",
+    "track-native-executor",
+    "local-independent-review"
   ]),
   safetyCaseIds: Object.freeze([
     "worker-denies-nested-task",
@@ -84,9 +87,14 @@ export const evaluationContract = Object.freeze({
     "track-missing-child-configuration": Object.freeze(["coordinator"]),
     "track-named-agent-mismatch": Object.freeze(["coordinator"]),
     "track-matching-named-agent": Object.freeze(["coordinator", "templates", "worker"]),
-    "standalone-brainstorming": Object.freeze(["coordinator"])
+    "standalone-brainstorming": Object.freeze(["coordinator"]),
+    "track-local-execution": Object.freeze(["coordinator"]),
+    "track-native-executor": Object.freeze(["coordinator", "templates", "worker"]),
+    "local-independent-review": Object.freeze(["coordinator", "worker"])
   }),
   requiredLaterStages: Object.freeze({
-    "track-matching-named-agent": Object.freeze(["references/review.md", "references/architect/review.md"])
+    "track-matching-named-agent": Object.freeze(["references/review.md", "references/architect/review.md"]),
+    "track-local-execution": Object.freeze(["references/review.md", "references/architect/review.md"]),
+    "track-native-executor": Object.freeze(["references/review.md", "references/architect/review.md"])
   })
 });

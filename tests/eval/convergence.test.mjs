@@ -6,7 +6,7 @@ import { evaluationContract } from "./evaluation-contract.mjs";
 
 test("Track runtime documentation covers entry, phase ordering and final completion", () => {
   const runtime = readFileSync("references/architect/track-runtime.md", "utf8");
-  for (const rule of ["existing Manual or Auto choice", "earlier unfinished phase gate", "only missing or invalidated checks", "registry `[~]`", "metadata `in_progress`", "metadata `completed`", "Any earlier blocker leaves the Track in progress"]) assert.ok(runtime.includes(rule), rule);
+  for (const rule of ["Auto by default when implementation is clearly authorized", "earlier unfinished phase gate", "only missing or invalidated checks", "registry `[~]`", "metadata `in_progress`", "metadata `completed`", "Final review is a reconciliation boundary", "requested-tier evidence"]) assert.ok(runtime.includes(rule), rule);
   const propose = readFileSync("references/architect/propose.md", "utf8");
   assert.match(propose, /route through `references\/track-gate.md` to `references\/architect\/track-runtime.md`/);
 });

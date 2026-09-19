@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { lstatSync, readFileSync, readlinkSync, realpathSync } from "node:fs";
+import { lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, isAbsolute, join, normalize, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -62,25 +62,63 @@ export function normalizeScope({ ownedPaths, readOnlyPaths }) {
   return { ownedPaths: owned, readOnlyPaths: readOnly, paths: [...new Set([...owned, ...readOnly])].sort() };
 }
 
-function hashUntrackedEntry(worktree, path) {
-  const absolutePath = join(worktree, path);
-  const parent = realpathSync(dirname(absolutePath));
-  if (!isWithin(worktree, parent)) throw new Error(`Untracked path escapes worktree through its parent: ${path}`);
-  const stat = lstatSync(absolutePath);
-  if (stat.isSymbolicLink()) return `symlink\0${readlinkSync(absolutePath)}\0`;
-  if (stat.isFile()) return `file\0${sha256(readFileSync(absolutePath))}\0`;
-  if (stat.isDirectory()) return "directory\0";
-  throw new Error(`Unsupported untracked file type: ${path}`);
+function nearestExistingAncestor(path) {
+  let candidate = path;
+  while (true) {
+    try {
+      lstatSync(candidate);
+      return candidate;
+    } catch (error) {
+      if (error?.code !== "ENOENT" || candidate === dirname(candidate)) throw error;
+      candidate = dirname(candidate);
+    }
+  }
 }
 
+function assertScopeParent(worktree, absolutePath, scopePath) {
+  const ancestor = nearestExistingAncestor(dirname(absolutePath));
+  const resolvedAncestor = realpathSync(ancestor);
+  if (!isWithin(worktree, resolvedAncestor)) {
+    throw new Error(`Declared scope path escapes worktree through its parent: ${scopePath}`);
+  }
+}
+
+function hashDeclaredEntry(worktree, absolutePath, scopePath) {
+  assertScopeParent(worktree, absolutePath, scopePath);
+  let stat;
+  try {
+    stat = lstatSync(absolutePath);
+  } catch (error) {
+    if (error?.code === "ENOENT") return `missing\0${scopePath}\0`;
+    throw error;
+  }
+  if (stat.isSymbolicLink()) {
+    throw new Error(`Unsupported declared scope symlink: ${scopePath}; declare the real in-worktree path instead.`);
+  }
+  if (stat.isFile()) return `file\0${sha256(readFileSync(absolutePath))}\0`;
+  if (stat.isDirectory()) {
+    const children = readdirSync(absolutePath, { withFileTypes: true })
+      .map((entry) => entry.name)
+      .sort()
+      .map((name) => {
+        const childPath = join(absolutePath, name);
+        const childScopePath = `${scopePath}/${name}`;
+        return `${childScopePath}\0${hashDeclaredEntry(worktree, childPath, childScopePath)}`;
+      });
+    return `directory\0${children.join("\0")}\0`;
+  }
+  throw new Error(`Unsupported declared scope file type: ${scopePath}`);
+}
+
+// This fingerprint intentionally walks only explicitly declared scope paths.
+// Directory declarations include their descendants. Symlinks are rejected so
+// a target cannot change without changing the declared scope fingerprint;
+// declare the real in-worktree path instead. Missing paths are recorded so a
+// later creation is detected; unsupported file types fail attestation.
 function relevantUntrackedFingerprint(worktree, paths) {
-  const names = git(worktree, ["ls-files", "--others", "--exclude-standard", "-z", "--", ...paths])
-    .toString("utf8")
-    .split("\0")
-    .filter(Boolean)
-    .map(normalizeScopePath)
-    .sort();
-  return sha256(names.map((path) => `${path}\0${hashUntrackedEntry(worktree, path)}`).join(""));
+  return sha256(paths
+    .map((path) => `${path}\0${hashDeclaredEntry(worktree, join(worktree, path), path)}`)
+    .join(""));
 }
 
 function isRecord(value) {

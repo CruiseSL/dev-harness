@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assessDelivery, compareDeliveries, deliveryCases, prepareDelivery, startDelivery } from "./delivery.mjs";
+import { assessDelivery, compareDeliveries, deliveryCases, scheduledReportCase, prepareDelivery, startDelivery } from "./delivery.mjs";
 import { createFilesystemSource, createGitSource, readJson } from "./score.mjs";
 import { evaluationContract } from "./evaluation-contract.mjs";
 
@@ -10,15 +10,15 @@ const [command = "plan", directory, id, evidenceFile] = process.argv.slice(2);
 try {
   let result;
   if (command === "plan") {
-    result = { evidenceType: "delivery-plan", modelCalls: false, cases: deliveryCases.map(({id, level, prompt, owned}) => ({id, level, prompt, owned})),
-      usage: "prepare <new-directory> | start <directory> <run-id> | assess <directory> <run-id> <observations.json> | compare <directory>" };
+    result = { evidenceType: "delivery-plan", modelCalls: false, cases: deliveryCases.map(({id, level, prompt, owned}) => ({id, level, prompt, owned})), optionalCases: [scheduledReportCase].map(({id,level,prompt,owned})=>({id,level,prompt,owned})),
+      usage: "prepare <new-directory> | prepare-batch <new-directory> | start <directory> <run-id> | assess <directory> <run-id> <observations.json> | compare <directory>" };
   } else {
     if (!directory) throw new Error("An exercise directory is required.");
-    if (command === "prepare") {
+    if (command === "prepare" || command === "prepare-batch") {
       const baseline = readJson(join(root, "tests/eval/baselines/v2.5.json"));
       const baselineSource = createGitSource(root, baseline.revision);
       const candidateSource = createFilesystemSource(root);
-      result = prepareDelivery({ output: directory, sources: {
+      result = prepareDelivery({ output: directory, ...(command === "prepare-batch" ? {caseIds:[scheduledReportCase.id]} : {}), sources: {
         baseline: { ...baselineSource, files: Object.keys(baseline.sourceHashes).filter((p) => p !== "tests/validate.mjs") },
         candidate: { ...candidateSource, files: evaluationContract.candidatePackageFiles.filter((p) => p !== "tests/validate.mjs") }
       } });

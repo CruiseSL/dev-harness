@@ -77,7 +77,7 @@
       "type": "contains-all",
       "path": "references/review.md",
       "includes": [
-        "Review is read-only by default.",
+        "Review is strictly read-only.",
         "The Coordinator decides which findings to fix."
       ]
     },
@@ -87,7 +87,7 @@
       "path": "references/architect/contracts.md",
       "includes": [
         "Any Git commit",
-        "Explicit commit request in the current conversation"
+        "explicit current-user request or standing user/repository commit authorization already recorded"
       ]
     },
     {

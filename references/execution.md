@@ -64,19 +64,11 @@ Do not create tests solely for implementation details or imagined unsupported in
 
 Documentation, lifecycle bookkeeping, or one changed test expectation does not trigger a broad validation bundle. Do not add acceptance-irrelevant tests to raise coverage; coverage runs only for a repository hard threshold or explicit Work Order requirement.
 
-For external validation, the Coordinator records a deadline, poll interval, max polls, and terminal evidence. Executors do not wait or poll. Reaching the deadline or max polls returns `blocked` or `partial`; a new child or Work Order cannot extend it.
+For external validation, the Coordinator records a deadline, poll interval, max polls, and terminal evidence. Executors do not wait or poll. Validate the target-runtime thin path early when the requested tier and existing authorization permit it; a local event-only check does not prove a target-runtime or business tier. Reaching the deadline or max polls returns `blocked` or `partial`; a new child or Work Order cannot extend it.
 
-A corrective cycle is one re-edit after the initial implementation fails a required check, followed by rerunning the relevant required validation. The initial implementation and its first validation are attempt zero and do not consume a corrective cycle. Defaults:
+Repair counts are diagnostic evidence, not automatic stop conditions. The initial implementation and first validation are attempt zero. After one Quick or two Scoped/Track repair cycles, reassess cause, evidence, and method; continue already-authorized work when meaningful progress or new evidence exists. A third meaningful in-scope repair needs no user approval merely because that checkpoint was reached. Repeated same-cause failure with unchanged evidence stops or replans; never blind-retry it through a new worker.
 
-- Quick: one corrective cycle.
-- Scoped: two corrective cycles.
-- Track unit: two corrective cycles.
-
-For a review fix Work Order, applying the approved finding is attempt zero; one corrective cycle permits one re-edit only if that fix then fails its required validation. The Work Order may set a smaller budget. It may record a larger budget only after the current user explicitly approves a new limit for a named risk. Correct one obvious command or environment mistake once without counting it as a product fix; repeated environment failure is a blocker.
-
-A one-line or mechanical correction remains in the current authorized fix cycle and does not create a new parent Work Order, Track, or Reviewer Session. Rerun only the focused check proving the finding plus the smallest adjacent check required by changed scope.
-
-Budget limits are hard stop conditions. The Coordinator cannot increase them. Only the current user may explicitly approve a new limit for a named finding or risk; record that approval and new limit. A new Session, child, Reviewer, Work Order, phase, or repeated validation never resets or extends a budget.
+Only an explicit current-user hard limit is a hard stop. Carry it across Sessions, Work Orders, phases, and workers; legacy framework defaults are not user-set limits. Keep the same Executor and Work Order identity for an in-scope repair, with a Coordinator-supplied same-ID amendment and refreshed envelope when needed. Reviewer remains strictly read-only; the developer or Coordinator-local owner applies approved fixes.
 
 ## Stop Conditions
 
@@ -84,7 +76,7 @@ Stop and return `blocked` or `partial` when:
 
 - Acceptance or scope requires a material decision not present in the Work Order.
 - A required edit would touch unowned or ambiguous user changes.
-- Validation still fails after the corrective-cycle budget.
+- An explicit current-user hard limit is exhausted, or repeated same-cause failure has unchanged evidence and no safe replan.
 - The next check is broad, destructive, externally consequential, credential-dependent, or long-running without authorization.
 - A significant dependency, architecture, public contract, migration, security, or data-model change is required but unapproved.
 - The requested outcome is complete and remaining ideas are cleanup or improvement only.

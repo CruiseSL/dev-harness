@@ -1,8 +1,12 @@
 import { dirname, join, resolve } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import {
   buildProtocolBundle,
+  createLiveAbortController,
   createLivePlan,
+  DEFAULT_LIVE_OUTPUT_BYTES,
+  DEFAULT_LIVE_TIMEOUT_MS,
   executeLivePilot
 } from "./live.mjs";
 import {
@@ -30,21 +34,31 @@ export function parseArgs(args) {
     execute: false,
     json: false,
     model: DEFAULT_MODEL,
+    maxOutputBytes: DEFAULT_LIVE_OUTPUT_BYTES,
     repetitions: 1,
     route: DEFAULT_ROUTE,
-    variant: DEFAULT_VARIANT
+    timeoutMs: DEFAULT_LIVE_TIMEOUT_MS,
+    variant: DEFAULT_VARIANT,
+    output: null,
+    journal: null,
+    resume: false
   };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === "--execute") options.execute = true;
     else if (arg === "--json") options.json = true;
-    else if (["--route", "--repetitions", "--model", "--variant"].includes(arg)) {
+    else if (arg === "--resume") options.resume = true;
+    else if (["--route", "--repetitions", "--model", "--variant", "--timeout-ms", "--max-output-bytes", "--output", "--journal"].includes(arg)) {
       const value = optionValue(args, index, arg);
       index += 1;
       if (arg === "--route") options.route = value;
       if (arg === "--model") options.model = value;
       if (arg === "--variant") options.variant = value;
       if (arg === "--repetitions") options.repetitions = Number(value);
+      if (arg === "--timeout-ms") options.timeoutMs = Number(value);
+      if (arg === "--max-output-bytes") options.maxOutputBytes = Number(value);
+      if (arg === "--output") options.output = value;
+      if (arg === "--journal") options.journal = value;
     } else if (arg === "--help") {
       return { help: true };
     } else {
@@ -53,6 +67,13 @@ export function parseArgs(args) {
   }
   if (!Number.isInteger(options.repetitions) || options.repetitions < 1) {
     throw new Error("--repetitions must be a positive integer.");
+  }
+  if (!Number.isInteger(options.timeoutMs) || options.timeoutMs <= 0) throw new Error("--timeout-ms must be a positive integer.");
+  if (!Number.isInteger(options.maxOutputBytes) || options.maxOutputBytes <= 0) throw new Error("--max-output-bytes must be a positive integer.");
+  if (options.resume && !options.execute) throw new Error("--resume requires --execute.");
+  if (options.execute && !options.journal) throw new Error("--execute requires --journal <path> so completed paid calls are checkpointed.");
+  if (options.output && options.journal && resolve(options.output) === resolve(options.journal)) {
+    throw new Error("--output and --journal must use different paths.");
   }
   return options;
 }
@@ -88,7 +109,7 @@ function renderText(result) {
   const value = (metric) => metric ?? "unavailable";
   const lines = [
     `Live A/B evaluation ${result.status}.`,
-    `Route: ${result.route}; completed invocations: ${result.runs.length}.`,
+    `Route: ${result.route}; completed invocations: ${result.runs.length}; remaining: ${result.recovery?.remainingInvocations ?? 0}.`,
     "Per-run evidence:"
   ];
   for (const run of result.runs) {
@@ -107,13 +128,22 @@ function renderText(result) {
     `Hard-gate failures: ${result.runs.filter((run) => !run.hardGates.passed).length}.`,
     result.releaseReadiness.reason
   );
+  if (result.recovery?.journalPath) {
+    lines.push(`Recovery journal: ${result.recovery.journalPath}; reused runs: ${result.recovery.reusedRunCount}.`);
+  }
+  if (result.recovery?.journalWriteError) lines.push(`Journal write error: ${result.recovery.journalWriteError}.`);
   return lines.join("\n");
+}
+
+async function writeOutput(path, content) {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content, "utf8");
 }
 
 async function run() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
-    process.stdout.write("Usage: node tests/eval/run-live.mjs [--route <id>] [--repetitions <n>] [--model <provider/model>] [--variant <name>] [--execute] [--json]\n");
+    process.stdout.write("Usage: node tests/eval/run-live.mjs [--route <id>] [--repetitions <n>] [--model <provider/model>] [--variant <name>] [--timeout-ms <n>] [--max-output-bytes <n>] [--journal <path>] [--resume] [--output <path>] [--execute] [--json]\n");
     return;
   }
   const definition = loadLiveDefinition(options.route);
@@ -125,18 +155,31 @@ async function run() {
     baselineBundle: definition.baselineBundle,
     candidateBundle: definition.candidateBundle
   });
-  const result = options.execute
-    ? await executeLivePilot({
-      route: options.route,
-      repetitions: options.repetitions,
-      model: options.model,
-      variant: options.variant,
-      baselineBundle: definition.baselineBundle,
-      candidateBundle: definition.candidateBundle,
-      expectedPlannedChildDispatchCount: definition.expectedPlannedChildDispatchCount
-    })
-    : plan;
-  process.stdout.write(options.json ? `${JSON.stringify(result, null, 2)}\n` : `${renderText(result)}\n`);
+  const abortController = options.execute ? createLiveAbortController() : null;
+  let result;
+  try {
+    result = options.execute
+      ? await executeLivePilot({
+        route: options.route,
+        repetitions: options.repetitions,
+        model: options.model,
+        variant: options.variant,
+        baselineBundle: definition.baselineBundle,
+        candidateBundle: definition.candidateBundle,
+        expectedPlannedChildDispatchCount: definition.expectedPlannedChildDispatchCount,
+        timeoutMs: options.timeoutMs,
+        maxOutputBytes: options.maxOutputBytes,
+        journalPath: options.journal,
+        resume: options.resume,
+        signal: abortController.signal
+      })
+      : plan;
+  } finally {
+    abortController?.dispose();
+  }
+  const output = options.json ? `${JSON.stringify(result, null, 2)}\n` : `${renderText(result)}\n`;
+  if (options.output) await writeOutput(options.output, output);
+  process.stdout.write(output);
   if (options.execute && result.status !== "completed") process.exitCode = 1;
 }
 

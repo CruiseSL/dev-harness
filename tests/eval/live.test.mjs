@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import { isAbsolute, join } from "node:path";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import test from "node:test";
 import {
   aggregateLivePilot,
@@ -8,6 +11,7 @@ import {
   createLivePlan,
   createLivePrompt,
   executeLivePilot,
+  invokeOpenCode,
   makeAbbaPlan,
   opencodeCommand,
   renderProtocolBundle
@@ -50,6 +54,20 @@ function terminalEvents({ input = 100, output = 40, cache = 10, total = 150, pla
     { type: "step_finish", usage: { input, output, cache, total } },
     { type: "text", text: JSON.stringify({ terminalState: "completed", plannedChildDispatchCount, summary: "controlled" }) }
   ].map((event) => JSON.stringify(event)).join("\n");
+}
+
+function fakeChildProcess({ closeOnKill = true } = {}) {
+  const child = new EventEmitter();
+  child.pid = 98765;
+  child.stdout = new EventEmitter();
+  child.stderr = new EventEmitter();
+  child.killSignals = [];
+  child.kill = (signal) => {
+    child.killSignals.push(signal);
+    if (closeOnKill) setImmediate(() => child.emit("close", null, signal));
+    return true;
+  };
+  return child;
 }
 
 test("protocol bundles preserve declared stages and label byte measurements", () => {
@@ -226,4 +244,124 @@ test("aggregate reports reductions for provider tokens, elapsed time, and child 
   assert.equal(report.reductions.medianTotalTokens.reduction, 50);
   assert.equal(report.reductions.actualTaskToolChildCalls.reduction, 2);
   assert.equal(report.reductions.declaredChildDispatches.reduction, 2);
+});
+
+test("OpenCode invocation bounds output and reports a timed-out process after cooperative cancellation", async () => {
+  const child = fakeChildProcess();
+  const result = await invokeOpenCode({
+    cwd: "/private/tmp",
+    command: [],
+    timeoutMs: 5,
+    killGraceMs: 1,
+    maxOutputBytes: 4,
+    spawnProcess: () => child
+  });
+  assert.equal(result.timedOut, true);
+  assert.equal(result.cancelled, false);
+  assert.equal(result.terminationReason, "timeout");
+  assert.deepEqual(child.killSignals, ["SIGINT"]);
+});
+
+test("OpenCode invocation settles after escalation when a child never emits close", async () => {
+  const child = fakeChildProcess({ closeOnKill: false });
+  const result = await invokeOpenCode({
+    cwd: "/private/tmp",
+    command: [],
+    timeoutMs: 2,
+    killGraceMs: 1,
+    spawnProcess: () => child
+  });
+  assert.equal(result.timedOut, true);
+  assert.equal(result.settledAfterKill, true);
+  assert.deepEqual(child.killSignals, ["SIGINT", "SIGTERM", "SIGKILL"]);
+});
+
+test("OpenCode invocation responds to AbortSignal and caps each output stream", async () => {
+  const child = fakeChildProcess();
+  const controller = new AbortController();
+  const resultPromise = invokeOpenCode({
+    cwd: "/private/tmp",
+    command: [],
+    timeoutMs: 1000,
+    maxOutputBytes: 4,
+    signal: controller.signal,
+    spawnProcess: () => child
+  });
+  child.stdout.emit("data", "123456789");
+  child.stderr.emit("data", "abcdefgh");
+  controller.abort();
+  const result = await resultPromise;
+  assert.equal(result.cancelled, true);
+  assert.equal(result.timedOut, false);
+  assert.equal(result.outputTruncated, true);
+  assert.equal(Buffer.byteLength(result.stdout), 4);
+  assert.equal(Buffer.byteLength(result.stderr), 4);
+  assert.equal(result.terminationReason, "cancelled");
+});
+
+test("live journals checkpoint completed samples and resume only unrecorded identities", async () => {
+  const baselineBundle = bundle("baseline");
+  const candidateBundle = bundle("candidate");
+  const journalRoot = mkdtempSync(join(tmpdir(), "dev-harness-live-journal-"));
+  const journalPath = join(journalRoot, "pilot.json");
+  const controller = new AbortController();
+  let firstCalls = 0;
+  const invoke = async () => {
+    firstCalls += 1;
+    if (firstCalls === 2) controller.abort();
+    return {
+      stdout: terminalEvents(),
+      stderr: "",
+      exitCode: 0,
+      signal: null,
+      elapsedMs: 1,
+      processTiming: { firstStdoutMs: 1, lastStdoutMs: 1, postOutputMs: 0 }
+    };
+  };
+  try {
+    const partial = await executeLivePilot({
+      route: route().id,
+      repetitions: 1,
+      model: "vertexflow/gpt-5.6-terra",
+      variant: "xhigh",
+      baselineBundle,
+      candidateBundle,
+      journalPath,
+      signal: controller.signal,
+      invoke
+    });
+    assert.equal(partial.status, "cancelled");
+    assert.equal(partial.runs.length, 2);
+    assert.equal(JSON.parse(readFileSync(journalPath, "utf8")).runs.length, 2);
+
+    let resumeCalls = 0;
+    const resumed = await executeLivePilot({
+      route: route().id,
+      repetitions: 1,
+      model: "vertexflow/gpt-5.6-terra",
+      variant: "xhigh",
+      baselineBundle,
+      candidateBundle,
+      journalPath,
+      resume: true,
+      invoke: async () => {
+        resumeCalls += 1;
+        return {
+          stdout: terminalEvents(),
+          stderr: "",
+          exitCode: 0,
+          signal: null,
+          elapsedMs: 1,
+          processTiming: { firstStdoutMs: 1, lastStdoutMs: 1, postOutputMs: 0 }
+        };
+      }
+    });
+    assert.equal(resumed.status, "completed");
+    assert.equal(resumed.runs.length, 4);
+    assert.equal(resumed.recovery.reusedRunCount, 2);
+    assert.equal(resumeCalls, 2);
+    assert.equal(JSON.parse(readFileSync(journalPath, "utf8")).runs.length, 4);
+  } finally {
+    rmSync(journalRoot, { recursive: true, force: true });
+  }
 });

@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
-import { assessDelivery, checkExercise, compareDeliveries, deliveryCases, prepareDelivery, startDelivery } from "./delivery.mjs";
+import { assessDelivery, checkExercise, compareDeliveries, deliveryCases, scheduledReportCase, prepareDelivery, startDelivery } from "./delivery.mjs";
 
 function withExercises(fn) {
   const parent = mkdtempSync(join(tmpdir(), "dev-harness-delivery-test-"));
@@ -22,7 +22,7 @@ const solutions = {
   },
   "bounded-pagination": {"src/page.mjs": 'export function page(items, offset, limit) { return items.slice(offset, offset + limit); }\n'}
 };
-const runtime = {host:"test-host", model:"test-model", reasoning:"test-effort"};
+const runtime = {host:"test-host", model:"test-model", reasoning:"test-effort", roles:{executor:null,reviewer:null}};
 
 test("real exercise probes fail initially and verify accepted in-scope implementations", () => withExercises((root, manifest) => {
   const reports = [];
@@ -65,7 +65,32 @@ test("partial, missing and duplicated pairs cannot count as delivery speedups", 
   assert.equal(compareDeliveries(failed).medianPairedReductionMs, null);
   assert.equal(compareDeliveries([...runs,runs[0]]).speedComparisonEligible, false);
   assert.equal(compareDeliveries(runs.map((run,i) => i === 0 ? {...run, runtime:null} : run)).speedComparisonEligible, false);
+  assert.equal(compareDeliveries(runs.map((run,i) => i === 0 ? {...run, runtime:{host:runtime.host,model:runtime.model,reasoning:runtime.reasoning}} : run)).speedComparisonEligible, false);
   assert.equal(compareDeliveries(runs.map((run,i) => i === 0 ? {...run, runtime:{...runtime, model:"other"}} : run)).speedComparisonEligible, false);
+  assert.equal(compareDeliveries(runs.map((run,i) => i === 0 ? {...run, runtime:{...runtime,roles:{executor:{model:"other",reasoning:"high"}}}} : run)).speedComparisonEligible, false);
+});
+
+test("scheduled report exercise detects the real entrypoint gap and accepts one coherent local batch", () => {
+  const parent = mkdtempSync(join(tmpdir(), "dev-harness-batch-test-"));
+  const root = join(parent, "runs");
+  try {
+    const source = {files:["SKILL.md"],read:()=>"Fixture protocol.\n"};
+    const {runs:[run]} = prepareDelivery({output:root,sources:{candidate:source},caseIds:[scheduledReportCase.id]});
+    assert.equal(checkExercise(run.workspace,scheduledReportCase).passed,false);
+    startDelivery(root,run.id);
+    writeFileSync(join(run.workspace,"src/config.mjs"), "export const loadConfig = env => ({destination:env.REPORT_DESTINATION,dryRun:env.DRY_RUN === 'true'});\n");
+    writeFileSync(join(run.workspace,"src/report.mjs"), "export function summarize(rows) { const bySource={}; let total=0; for(const r of rows){total+=r.count;bySource[r.source]=(bySource[r.source]??0)+r.count;} return {total,bySource}; }\n");
+    const implementation = "import {loadConfig} from './config.mjs'; import {summarize} from './report.mjs'; export async function scheduled(event,env,deps){ const {destination,dryRun}=loadConfig(env); const day=new Date(event.scheduledTime-86400000).toISOString().slice(0,10); const key=`${day}:${destination}`; if(deps.delivered.has(key))return {status:'duplicate',day}; const report={day,...summarize(await deps.collect(day))}; if(dryRun)return {status:'preview',report}; await deps.deliver(destination,report); deps.delivered.add(key); return {status:'delivered',report}; }\n";
+    writeFileSync(join(run.workspace,"src/scheduled.mjs"),implementation.replace("const {destination,dryRun}=loadConfig(env);", "if(event.scheduledTime%60000)throw new Error('invalid schedule'); const {destination,dryRun}=loadConfig(env);"));
+    assert.equal(checkExercise(run.workspace,scheduledReportCase).passed,false);
+    writeFileSync(join(run.workspace,"src/scheduled.mjs"),implementation);
+    assert.equal(checkExercise(run.workspace,scheduledReportCase).passed,false, "Pending README must not pass batch acceptance");
+    writeFileSync(join(run.workspace,"README.md"), "Normal entrypoint: src/scheduled.mjs, scheduled(event, env, deps).\nEvidence tier: local fixture\nUnverified: cloud scheduling and real delivery\n");
+    const report = assessDelivery(root,run.id,{terminalState:"accepted",runtime,childDispatchCount:1,reviewerDispatchCount:1});
+    assert.equal(report.completed,true);
+    assert.equal(report.metrics.noncachedInputTokens,null);
+    assert.equal(compareDeliveries([report]).speedComparisonEligible,false);
+  } finally {rmSync(parent,{recursive:true,force:true});}
 });
 
 test("delivery plan CLI performs no provider calls", () => {

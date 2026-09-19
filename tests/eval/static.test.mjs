@@ -136,6 +136,21 @@ function trackGateRuntime(source) {
   return source.read("references/track-gate.md");
 }
 
+test("current local, native developer and independent reviewer routes have distinct costs and contracts", () => {
+  const source = createFilesystemSource(repositoryRoot);
+  const routes = deriveCandidateRoutes(source, baseline);
+  const local = routes.find((route) => route.id === "track-local-execution");
+  const developer = routes.find((route) => route.id === "track-native-executor");
+  const reviewer = routes.find((route) => route.id === "local-independent-review");
+  assert.equal(local.expected.dispatch, false);
+  assert.deepEqual(local.worker, []);
+  assert.deepEqual(developer.worker, ["templates/executor-contract.md"]);
+  assert.deepEqual(reviewer.worker, ["templates/reviewer-contract.md"]);
+  assert.deepEqual(reviewer.templates, []);
+  for (const route of [local, developer, reviewer]) assert.equal(route.expected.frozenComparisonAvailable, false);
+  assert.equal(routes.find((route) => route.id === "track-matching-named-agent").expected.frozenComparisonAvailable, true);
+});
+
 function trackRuntime(source) {
   return source.read("references/architect/track-runtime.md");
 }
@@ -212,7 +227,8 @@ test("candidate scoring rejects broken references, missing canonical owners, and
 
   const missingCanonicalFailures = evaluateCandidate((path) => {
     const content = source.read(path);
-    return path === "references/review.md" ? content.replace("Review is read-only by default.", "Review may edit by default.") : content;
+    const rule = inputs.normativeRules.find((entry) => entry.id === "review-does-not-authorize-fixes").canonical;
+    return path === rule.path ? content.replace(rule.includes, "Review may edit by default.") : content;
   });
   assert.equal(missingCanonicalFailures.find((entry) => entry.id === "blocking:missing-canonical-rule:review-does-not-authorize-fixes")?.category, "blocking");
 

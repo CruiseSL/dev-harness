@@ -1,12 +1,31 @@
 import { execFileSync, spawn } from "node:child_process";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { access, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 export const LIVE_EVALUATION_SCHEMA_VERSION = 1;
 export const DEFAULT_LIVE_AGENT = "dev-harness-live-evaluator";
 export const MATCHING_TRACK_AGENT = "dev-harness-worker";
 export const LIVE_PROTOCOL_MEASUREMENT = "UTF-8 protocol bytes, not provider token counts.";
+export const DEFAULT_LIVE_TIMEOUT_MS = 120_000;
+export const DEFAULT_LIVE_OUTPUT_BYTES = 4 * 1024 * 1024;
+export const LIVE_JOURNAL_SCHEMA_VERSION = 1;
+const PROCESS_KILL_GRACE_MS = 500;
+
+export function createLiveAbortController() {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  process.once("SIGINT", abort);
+  process.once("SIGTERM", abort);
+  return {
+    signal: controller.signal,
+    dispose() {
+      process.removeListener("SIGINT", abort);
+      process.removeListener("SIGTERM", abort);
+    }
+  };
+}
 
 const STAGES = [
   ["coordinator", "coordinator"],
@@ -21,6 +40,27 @@ const TOTAL_TOKEN_KEYS = ["total", "totalTokens", "total_tokens"];
 
 function byteLength(content) {
   return Buffer.byteLength(content, "utf8");
+}
+
+function sha256(content) {
+  return createHash("sha256").update(content).digest("hex");
+}
+
+function bundleContentFingerprint(bundle) {
+  return sha256(bundle.files
+    .map(({ stage, path, bytes, content }) => `${stage}\0${path}\0${bytes}\0${content}\0`)
+    .join(""));
+}
+
+function appendCapped(current, chunk, maxBytes) {
+  const incoming = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+  const currentBytes = Buffer.byteLength(current, "utf8");
+  const remaining = Math.max(0, maxBytes - currentBytes);
+  if (incoming.length <= remaining) return { value: `${current}${incoming.toString("utf8")}`, truncated: false };
+  return {
+    value: `${current}${incoming.subarray(0, remaining).toString("utf8")}`,
+    truncated: true
+  };
 }
 
 function unique(values) {
@@ -215,7 +255,21 @@ export function parseJsonEventOutput(output) {
   }
 }
 
-export function collectLiveRunEvidence({ stdout, stderr = "", exitCode, signal = null, elapsedMs, processTiming = null, fixtureStatus = "" }) {
+export function collectLiveRunEvidence({
+  stdout,
+  stderr = "",
+  exitCode,
+  signal = null,
+  elapsedMs,
+  processTiming = null,
+  fixtureStatus = "",
+  timedOut = false,
+  cancelled = false,
+  outputTruncated = false,
+  terminationReason = null,
+  fixtureCleanupError = null,
+  settledAfterKill = false
+}) {
   const parsed = parseJsonEventOutput(stdout);
   const usage = aggregateProviderTokens(collectUsageRecords(parsed.events));
   const texts = collectTextCandidates(parsed.events);
@@ -229,12 +283,17 @@ export function collectLiveRunEvidence({ stdout, stderr = "", exitCode, signal =
   if (!fixtureClean) hardGateFailures.push("fixture-write-detected");
   if (calls.length > 0) hardGateFailures.push("prohibited-tool-use");
   if (!machine.valid) hardGateFailures.push("malformed-final-result");
+  if (timedOut) hardGateFailures.push("process-timed-out");
+  if (cancelled) hardGateFailures.push("process-cancelled");
+  if (outputTruncated) hardGateFailures.push("process-output-truncated");
+  if (fixtureCleanupError) hardGateFailures.push("fixture-cleanup-failed");
+  if (settledAfterKill) hardGateFailures.push("process-settlement-forced");
 
   return {
     providerTokens: usage,
     elapsedMs,
     processTiming,
-    process: { exitCode, signal, stderr },
+    process: { exitCode, signal, stderr, timedOut, cancelled, outputTruncated, terminationReason, settledAfterKill },
     eventParseErrors: parsed.parseErrors,
     sessionIds: sessions,
     sessionCount: sessions.length,
@@ -248,6 +307,12 @@ export function collectLiveRunEvidence({ stdout, stderr = "", exitCode, signal =
     terminalState: machine.terminalState,
     finalText: machine.finalText,
     fixture: { gitStatus: fixtureStatus, clean: fixtureClean },
+    fixtureCleanupError,
+    timedOut,
+    cancelled,
+    outputTruncated,
+    terminationReason,
+    settledAfterKill,
     hardGates: { passed: hardGateFailures.length === 0, failures: hardGateFailures }
   };
 }
@@ -354,6 +419,7 @@ function protocolBundleSummary(bundle) {
     route: bundle.route,
     measurement: bundle.measurement,
     files: bundle.files.map(({ stage, path, bytes }) => ({ stage, path, bytes })),
+    bundleContentSha256: bundleContentFingerprint(bundle),
     coordinatorProtocolBytes: bundle.coordinatorProtocolBytes,
     templateBytes: bundle.templateBytes,
     workerSystemBytes: bundle.workerSystemBytes,
@@ -430,7 +496,28 @@ export function opencodeCommand({ model, variant, protocolBundlePath, prompt }) 
   ];
 }
 
-export function invokeOpenCode({ cwd, command }) {
+function terminateChild(child, signalName) {
+  if (!child?.pid) return;
+  try {
+    if (process.platform === "win32") child.kill(signalName);
+    else process.kill(-child.pid, signalName);
+  } catch {
+    try { child.kill(signalName); } catch { /* The child may have already exited. */ }
+  }
+}
+
+export function invokeOpenCode({
+  cwd,
+  command,
+  timeoutMs = DEFAULT_LIVE_TIMEOUT_MS,
+  maxOutputBytes = DEFAULT_LIVE_OUTPUT_BYTES,
+  signal: abortSignal = null,
+  killGraceMs = PROCESS_KILL_GRACE_MS,
+  spawnProcess = spawn
+}) {
+  if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeoutMs must be a positive integer.");
+  if (!Number.isInteger(maxOutputBytes) || maxOutputBytes <= 0) throw new Error("maxOutputBytes must be a positive integer.");
+  if (!Number.isInteger(killGraceMs) || killGraceMs < 0) throw new Error("killGraceMs must be a non-negative integer.");
   return new Promise((resolve) => {
     const startedAt = performance.now();
     let stdout = "";
@@ -438,39 +525,134 @@ export function invokeOpenCode({ cwd, command }) {
     let spawnError = null;
     let firstStdoutMs = null;
     let lastStdoutMs = null;
-    const child = spawn("opencode", command, {
-      cwd,
-      env: { ...process.env, OPENCODE_CONFIG_CONTENT: fixtureConfig() },
-      stdio: ["ignore", "pipe", "pipe"]
-    });
-    child.stdout.on("data", (chunk) => {
+    let stdoutTruncated = false;
+    let stderrTruncated = false;
+    let terminationReason = null;
+    let terminationSignal = null;
+    let settled = false;
+    let timeoutHandle = null;
+    let escalationHandle = null;
+    let killHandle = null;
+    let settlementHandle = null;
+    let child = null;
+    let settledAfterKill = false;
+
+    const clearTimers = () => {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+      if (escalationHandle) clearTimeout(escalationHandle);
+      if (killHandle) clearTimeout(killHandle);
+      if (settlementHandle) clearTimeout(settlementHandle);
+    };
+    const finish = (exitCode, closeSignal, forced = false) => {
+      if (settled) return;
+      settled = true;
+      settledAfterKill ||= forced;
+      clearTimers();
+      abortSignal?.removeEventListener("abort", onAbort);
+      if (forced) {
+        child?.stdout?.destroy?.();
+        child?.stderr?.destroy?.();
+      }
       const elapsedMs = Math.round(performance.now() - startedAt);
-      if (firstStdoutMs === null) firstStdoutMs = elapsedMs;
-      lastStdoutMs = elapsedMs;
-      stdout += chunk;
-    });
-    child.stderr.on("data", (chunk) => { stderr += chunk; });
-    child.on("error", (error) => { spawnError = error.message; });
-    child.on("close", (exitCode, signal) => {
-      const elapsedMs = Math.round(performance.now() - startedAt);
+      if (spawnError) {
+        const appendedError = appendCapped(stderr, spawnError, maxOutputBytes);
+        stderr = appendedError.value;
+        stderrTruncated ||= appendedError.truncated;
+      }
       resolve({
         stdout,
-        stderr: spawnError ? `${stderr}${spawnError}` : stderr,
+        stderr,
         exitCode: exitCode ?? 1,
-        signal,
+        signal: closeSignal ?? terminationSignal,
         elapsedMs,
         processTiming: {
           firstStdoutMs,
           lastStdoutMs,
           postOutputMs: lastStdoutMs === null ? null : Math.max(0, elapsedMs - lastStdoutMs)
-        }
+        },
+        timedOut: terminationReason === "timeout",
+        cancelled: terminationReason === "cancelled",
+        outputTruncated: stdoutTruncated || stderrTruncated,
+        terminationReason,
+        settledAfterKill
       });
-    });
+    };
+    const requestTermination = (reason) => {
+      if (terminationReason || settled) return;
+      terminationReason = reason;
+      terminationSignal = "SIGINT";
+      terminateChild(child, "SIGINT");
+      escalationHandle = setTimeout(() => {
+        if (settled) return;
+        terminationSignal = "SIGTERM";
+        terminateChild(child, "SIGTERM");
+      }, killGraceMs);
+      killHandle = setTimeout(() => {
+        if (settled) return;
+        terminationSignal = "SIGKILL";
+        terminateChild(child, "SIGKILL");
+      }, killGraceMs * 2);
+      settlementHandle = setTimeout(() => {
+        if (settled) return;
+        terminationSignal = "SIGKILL";
+        finish(1, "SIGKILL", true);
+      }, Math.max(1, killGraceMs * 3));
+    };
+    function onAbort() {
+      requestTermination("cancelled");
+    }
+
+    if (abortSignal?.aborted) {
+      terminationReason = "cancelled";
+      finish(1, "SIGINT");
+      return;
+    }
+    abortSignal?.addEventListener("abort", onAbort, { once: true });
+    try {
+      child = spawnProcess("opencode", command, {
+        cwd,
+        env: { ...process.env, OPENCODE_CONFIG_CONTENT: fixtureConfig() },
+        stdio: ["ignore", "pipe", "pipe"],
+        detached: process.platform !== "win32"
+      });
+      child.stdout.on("data", (chunk) => {
+        const elapsedMs = Math.round(performance.now() - startedAt);
+        if (firstStdoutMs === null) firstStdoutMs = elapsedMs;
+        lastStdoutMs = elapsedMs;
+        const appended = appendCapped(stdout, chunk, maxOutputBytes);
+        stdout = appended.value;
+        stdoutTruncated ||= appended.truncated;
+      });
+      child.stderr.on("data", (chunk) => {
+        const appended = appendCapped(stderr, chunk, maxOutputBytes);
+        stderr = appended.value;
+        stderrTruncated ||= appended.truncated;
+      });
+      child.on("error", (error) => { spawnError = error.message; });
+      child.on("close", finish);
+      if (terminationReason) terminateChild(child, "SIGINT");
+      else timeoutHandle = setTimeout(() => requestTermination("timeout"), timeoutMs);
+    } catch (error) {
+      spawnError = error.message;
+      finish(1, null);
+    }
   });
 }
 
-export async function executeLiveInvocation({ bundle, invocation, model, variant, expectedPlannedChildDispatchCount, invoke = invokeOpenCode }) {
+export async function executeLiveInvocation({
+  bundle,
+  invocation,
+  model,
+  variant,
+  expectedPlannedChildDispatchCount,
+  timeoutMs = DEFAULT_LIVE_TIMEOUT_MS,
+  maxOutputBytes = DEFAULT_LIVE_OUTPUT_BYTES,
+  signal = null,
+  invoke = invokeOpenCode
+}) {
   let fixturePath = null;
+  let result = null;
+  let fixtureCleanupError = null;
   try {
     fixturePath = await createFixture(bundle);
     const prompt = createLivePrompt({ route: invocation.route, expectedPlannedChildDispatchCount });
@@ -480,9 +662,9 @@ export async function executeLiveInvocation({ bundle, invocation, model, variant
       protocolBundlePath: join(fixturePath, "protocol-bundle.md"),
       prompt
     });
-    const result = await invoke({ cwd: fixturePath, command });
+    result = await invoke({ cwd: fixturePath, command, timeoutMs, maxOutputBytes, signal });
     const evidence = collectLiveRunEvidence({ ...result, fixtureStatus: fixtureStatus(fixturePath) });
-    return {
+    result = {
       ...invocation,
       model,
       variant,
@@ -500,8 +682,23 @@ export async function executeLiveInvocation({ bundle, invocation, model, variant
       ...evidence
     };
   } finally {
-    if (fixturePath) await rm(fixturePath, { recursive: true, force: true });
+    if (fixturePath) {
+      try {
+        await rm(fixturePath, { recursive: true, force: true });
+      } catch (error) {
+        fixtureCleanupError = error.message;
+      }
+    }
   }
+  if (!result) throw new Error("Live invocation did not produce evidence.");
+  if (fixtureCleanupError) {
+    result.fixtureCleanupError = fixtureCleanupError;
+    result.hardGates = {
+      passed: false,
+      failures: [...result.hardGates.failures, "fixture-cleanup-failed"]
+    };
+  }
+  return result;
 }
 
 function quantiles(values) {
@@ -556,29 +753,317 @@ export function aggregateLivePilot(runs) {
   };
 }
 
-export async function executeLivePilot({ route, repetitions = 1, model, variant, baselineBundle, candidateBundle, expectedPlannedChildDispatchCount = 1, invoke = invokeOpenCode }) {
+export function createLivePlanIdentity({ route, repetitions, model, variant, expectedPlannedChildDispatchCount, baselineBundle, candidateBundle, timeoutMs = DEFAULT_LIVE_TIMEOUT_MS, maxOutputBytes = DEFAULT_LIVE_OUTPUT_BYTES }) {
+  const identity = {
+    schemaVersion: LIVE_JOURNAL_SCHEMA_VERSION,
+    route,
+    repetitions,
+    model,
+    variant,
+    agent: DEFAULT_LIVE_AGENT,
+    matchingNamedAgent: MATCHING_TRACK_AGENT,
+    expectedPlannedChildDispatchCount,
+    timeoutMs,
+    maxOutputBytes,
+    order: makeAbbaPlan(route, repetitions),
+    bundles: {
+      baseline: bundleContentFingerprint(baselineBundle),
+      candidate: bundleContentFingerprint(candidateBundle)
+    }
+  };
+  return { ...identity, fingerprint: sha256(JSON.stringify(identity)) };
+}
+
+function runRecoveryIdentity({ plan, invocation, bundle, index }) {
+  return {
+    schemaVersion: LIVE_JOURNAL_SCHEMA_VERSION,
+    planFingerprint: plan.fingerprint,
+    orderIndex: index,
+    route: invocation.route,
+    repetition: invocation.repetition,
+    position: invocation.position,
+    side: invocation.side,
+    model: plan.model,
+    variant: plan.variant,
+    agent: plan.agent,
+    expectedPlannedChildDispatchCount: plan.expectedPlannedChildDispatchCount,
+    bundleContentSha256: bundleContentFingerprint(bundle)
+  };
+}
+
+async function writeJsonAtomic(path, value) {
+  await mkdir(dirname(path), { recursive: true });
+  const temporaryPath = `${path}.tmp-${process.pid}-${Date.now()}`;
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+    await rename(temporaryPath, path);
+  } finally {
+    await rm(temporaryPath, { force: true }).catch(() => {});
+  }
+}
+
+export async function readLiveJournal(journalPath) {
+  return JSON.parse(await readFile(journalPath, "utf8"));
+}
+
+async function loadResumeJournal(journalPath, plan) {
+  let journal;
+  try {
+    journal = await readLiveJournal(journalPath);
+  } catch (error) {
+    if (error?.code === "ENOENT") throw new Error(`Cannot resume: live journal does not exist at ${journalPath}.`);
+    throw new Error(`Cannot read live journal ${journalPath}: ${error.message}`);
+  }
+  if (journal?.schemaVersion !== LIVE_JOURNAL_SCHEMA_VERSION || journal?.kind !== "live-evaluation-journal") {
+    throw new Error("Cannot resume: unsupported live journal schema.");
+  }
+  if (JSON.stringify(journal.planIdentity) !== JSON.stringify(plan)) {
+    throw new Error("Cannot resume: live journal identity does not match route, ordering, bundle content, model, or settings.");
+  }
+  if (journal.inFlight) {
+    throw new Error("Cannot resume: journal contains an unresolved in-flight invocation; refusing to rerun a possibly paid call.");
+  }
+  if (!Array.isArray(journal.runs)) throw new Error("Cannot resume: live journal runs must be an array.");
+  const byIndex = new Map();
+  for (const run of journal.runs) {
+    const index = run?.recoveryIdentity?.orderIndex;
+    if (!Number.isInteger(index) || byIndex.has(index)) throw new Error("Cannot resume: journal contains duplicate or invalid run ordering.");
+    if (run.recoveryIdentity.planFingerprint !== plan.fingerprint) throw new Error("Cannot resume: journal run identity does not match the plan.");
+    byIndex.set(index, run);
+  }
+  return { ...journal, byIndex };
+}
+
+export async function prepareLiveJournal({
+  journalPath,
+  route,
+  repetitions = 1,
+  model,
+  variant,
+  baselineBundle,
+  candidateBundle,
+  expectedPlannedChildDispatchCount = 1,
+  timeoutMs = DEFAULT_LIVE_TIMEOUT_MS,
+  maxOutputBytes = DEFAULT_LIVE_OUTPUT_BYTES,
+  resume = false,
+  requireExisting = false
+}) {
+  if (!journalPath) throw new Error("journalPath is required to prepare a live journal.");
+  const plan = createLivePlanIdentity({ route, repetitions, model, variant, expectedPlannedChildDispatchCount, baselineBundle, candidateBundle, timeoutMs, maxOutputBytes });
+  try {
+    const existing = await readLiveJournal(journalPath);
+    if (!resume) throw new Error(`Live journal already exists at ${journalPath}; pass resume or choose a new path.`);
+    if (existing?.schemaVersion !== LIVE_JOURNAL_SCHEMA_VERSION || existing?.kind !== "live-evaluation-journal") {
+      throw new Error("Cannot resume: unsupported live journal schema.");
+    }
+    if (JSON.stringify(existing.planIdentity) !== JSON.stringify(plan)) {
+      throw new Error("Cannot resume: live journal identity does not match route, ordering, bundle content, model, or settings.");
+    }
+    if (existing.inFlight) throw new Error("Cannot resume: journal contains an unresolved in-flight invocation; refusing to rerun a possibly paid call.");
+    return existing;
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    if (resume && requireExisting) throw new Error(`Cannot resume: expected live journal does not exist at ${journalPath}.`);
+    const pending = {
+      schemaVersion: LIVE_JOURNAL_SCHEMA_VERSION,
+      kind: "live-evaluation-journal",
+      status: "pending",
+      planIdentity: plan,
+      runs: [],
+      inFlight: null
+    };
+    await writeJsonAtomic(journalPath, pending);
+    return pending;
+  }
+}
+
+function invocationFailure({ invocation, bundle, plan, index, error }) {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
+    ...invocation,
+    model: plan.model,
+    variant: plan.variant,
+    agent: plan.agent,
+    matchingNamedAgent: plan.matchingNamedAgent,
+    protocolBundle: protocolBundleSummary(bundle),
+    command: ["opencode"],
+    recoveryIdentity: runRecoveryIdentity({ plan, invocation, bundle, index }),
+    providerTokens: {
+      inputTokens: null,
+      outputTokens: null,
+      cacheTokens: null,
+      totalTokens: null,
+      unavailable: { invocation: "OpenCode invocation failed before usable evidence was collected." }
+    },
+    elapsedMs: null,
+    processTiming: null,
+    process: { exitCode: 1, signal: null, stderr: message, timedOut: false, cancelled: false, outputTruncated: false, terminationReason: null, settledAfterKill: false },
+    eventParseErrors: ["OpenCode invocation failed before usable evidence was collected."],
+    sessionIds: [],
+    sessionCount: 0,
+    turns: null,
+    turnsReason: "OpenCode invocation failed before a completed turn.",
+    toolCallCount: 0,
+    taskToolChildCallCount: 0,
+    toolCalls: [],
+    plannedChildDispatchCount: null,
+    plannedChildDispatchReason: "OpenCode invocation failed before a terminal response.",
+    terminalState: null,
+    finalText: null,
+    fixture: { gitStatus: "", clean: true },
+    fixtureCleanupError: null,
+    timedOut: false,
+    cancelled: false,
+    outputTruncated: false,
+    terminationReason: null,
+    settledAfterKill: false,
+    hardGates: { passed: false, failures: ["invocation-error"] },
+    error: message
+  };
+}
+
+export async function executeLivePilot({
+  route,
+  repetitions = 1,
+  model,
+  variant,
+  baselineBundle,
+  candidateBundle,
+  expectedPlannedChildDispatchCount = 1,
+  timeoutMs = DEFAULT_LIVE_TIMEOUT_MS,
+  maxOutputBytes = DEFAULT_LIVE_OUTPUT_BYTES,
+  journalPath = null,
+  resume = false,
+  signal = null,
+  invoke = invokeOpenCode
+}) {
   const order = makeAbbaPlan(route, repetitions);
+  const plan = createLivePlanIdentity({ route, repetitions, model, variant, expectedPlannedChildDispatchCount, baselineBundle, candidateBundle, timeoutMs, maxOutputBytes });
+  let journal = null;
+  let resumed = false;
+  let journalWriteError = null;
+  if (resume && !journalPath) throw new Error("resume requires journalPath.");
+  if (journalPath) {
+    if (resume) {
+      journal = await loadResumeJournal(journalPath, plan);
+      resumed = true;
+    } else {
+      try {
+        await access(journalPath);
+        throw new Error(`Live journal already exists at ${journalPath}; pass resume or choose a new path.`);
+      } catch (error) {
+        if (error.message.includes("already exists")) throw error;
+        if (error?.code !== "ENOENT") throw error;
+      }
+      journal = {
+        schemaVersion: LIVE_JOURNAL_SCHEMA_VERSION,
+        kind: "live-evaluation-journal",
+        status: "running",
+        planIdentity: plan,
+        runs: [],
+        inFlight: null
+      };
+      await writeJsonAtomic(journalPath, journal);
+    }
+  }
+
+  const recordedRuns = journal?.byIndex ?? new Map();
   const runs = [];
-  for (const invocation of order) {
+  let terminalStatus = null;
+  for (const [index, invocation] of order.entries()) {
     const bundle = invocation.side === "baseline" ? baselineBundle : candidateBundle;
-    runs.push(await executeLiveInvocation({
-      bundle,
-      invocation,
-      model,
-      variant,
-      expectedPlannedChildDispatchCount,
-      invoke
-    }));
+    const recoveryIdentity = runRecoveryIdentity({ plan, invocation, bundle, index });
+    const recorded = recordedRuns.get(index);
+    if (recorded) {
+      if (JSON.stringify(recorded.recoveryIdentity) !== JSON.stringify(recoveryIdentity)) {
+        throw new Error(`Cannot resume: recorded invocation ${index} identity does not match the requested plan.`);
+      }
+      runs.push({ ...recorded, recovery: "reused-recorded-run" });
+      continue;
+    }
+    if (signal?.aborted) {
+      terminalStatus = "cancelled";
+      break;
+    }
+    if (journalPath) {
+      journal.inFlight = recoveryIdentity;
+      try {
+        await writeJsonAtomic(journalPath, journal);
+      } catch (error) {
+        journalWriteError = error.message;
+        terminalStatus = "journal-error";
+        break;
+      }
+    }
+    let run;
+    try {
+      run = await executeLiveInvocation({
+        bundle,
+        invocation,
+        model,
+        variant,
+        expectedPlannedChildDispatchCount,
+        timeoutMs,
+        maxOutputBytes,
+        signal,
+        invoke
+      });
+    } catch (error) {
+      run = invocationFailure({ invocation, bundle, plan, index, error });
+    }
+    run.recoveryIdentity = recoveryIdentity;
+    runs.push(run);
+    if (journalPath) {
+      journal.runs = runs.map(({ recovery, ...entry }) => entry);
+      journal.inFlight = null;
+      try {
+        await writeJsonAtomic(journalPath, journal);
+      } catch (error) {
+        journalWriteError = error.message;
+        terminalStatus = "journal-error";
+        break;
+      }
+    }
+    if (run.timedOut) {
+      terminalStatus = "timed-out";
+      break;
+    }
+    if (run.cancelled || signal?.aborted) {
+      terminalStatus = "cancelled";
+      break;
+    }
+  }
+
+  const allRunsCompleted = runs.length === order.length;
+  const status = terminalStatus
+    ?? (!allRunsCompleted ? "partial" : runs.every((run) => run.hardGates.passed) ? "completed" : "failed-hard-gates");
+  if (journalPath && !journalWriteError) {
+    journal.status = status;
+    journal.runs = runs.map(({ recovery, ...entry }) => entry);
+    journal.inFlight = null;
+    try {
+      await writeJsonAtomic(journalPath, journal);
+    } catch (error) {
+      journalWriteError = error.message;
+    }
   }
   return {
     schemaVersion: LIVE_EVALUATION_SCHEMA_VERSION,
-    status: runs.every((run) => run.hardGates.passed) ? "completed" : "failed-hard-gates",
+    status: journalWriteError ? "journal-error" : status,
     route,
     repetitions,
     model,
     variant,
     runs,
     aggregate: aggregateLivePilot(runs),
+    recovery: {
+      journalPath,
+      resumed,
+      reusedRunCount: runs.filter((run) => run.recovery === "reused-recorded-run").length,
+      remainingInvocations: Math.max(0, order.length - runs.length),
+      identity: plan,
+      journalWriteError
+    },
     releaseReadiness: {
       status: "not-assessed",
       reason: "Fixed-output input-cost measurements do not establish delivery speed, behavioral safety, or release readiness."

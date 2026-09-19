@@ -5,6 +5,7 @@ export const throughputMetricNames = Object.freeze([
   "validationReuseCount",
   "broadCheckCount",
   "externalPollCount",
+  "repairCheckpointCount",
   "budgetExtensionCount",
   "bookkeepingChildCount"
 ]);
@@ -27,9 +28,10 @@ export function classifyThroughputCase(input) {
 export function planDispatch(input) {
   const metrics = emptyMetrics();
   if (input.bookkeepingOnly) return { dispatch: false, owner: "Coordinator", metrics };
-  const dispatch = Boolean(input.level === "Track" || input.userRequestedIsolation || input.crossTrustBoundary || input.independentWorktree || input.significantTechnicalUncertainty || input.recordedSafetyReason);
+  // A Track label records durable coordination, not an unconditional child call.
+  const dispatch = Boolean(input.implementationOwner === "Executor" || input.userRequestedIsolation || input.crossTrustBoundary || input.independentWorktree || input.significantTechnicalUncertainty || input.recordedSafetyReason);
   if (dispatch) metrics.childDispatchCount = 1;
-  if (input.reviewerIndependent && dispatch) metrics.reviewerDispatchCount = 1;
+  if (input.reviewerIndependent) metrics.reviewerDispatchCount = 1;
   return { dispatch, owner: dispatch ? "Executor" : "Coordinator", metrics };
 }
 
@@ -37,15 +39,14 @@ export function externalSendDecision({ exactAuthorization }) {
   return exactAuthorization ? { allowed: true, owner: "Coordinator" } : { allowed: false, terminalState: "blocked" };
 }
 
-function sameSet(left, right) {
-  return JSON.stringify([...left].sort()) === JSON.stringify([...right].sort());
-}
-
 export function canMergeTrackUnits(left, right) {
-  return sameSet(left.ownership, right.ownership)
-    && sameSet(left.acceptance, right.acceptance)
-    && sameSet(left.validation, right.validation)
-    && left.rollbackBoundary === right.rollbackBoundary;
+  // This is a decision simulation, not an authorization or ownership verifier.
+  // Complementary files and checks can belong to the same approved outcome.
+  return ["outcomeId", "approvalId", "owner", "rolloutBoundary", "rollbackBoundary"].every((key) =>
+    typeof left[key] === "string" && left[key].trim() && left[key] === right[key])
+    && left.withinApprovedScope === true && right.withinApprovedScope === true
+    && !left.ownershipConflict && !right.ownershipConflict
+    && !left.requiresSeparateGate && !right.requiresSeparateGate;
 }
 
 export class ValidationLedger {
@@ -74,21 +75,31 @@ export class ValidationLedger {
   }
 }
 
-export class FixBudget {
-  constructor(limit) {
-    this.limit = limit;
+export class RepairProgress {
+  constructor({ checkpoint = 2, userHardLimit = null } = {}) {
+    if (!Number.isInteger(checkpoint) || checkpoint < 1) throw new Error("checkpoint must be a positive integer.");
+    if (userHardLimit !== null && (!Number.isInteger(userHardLimit) || userHardLimit < 0)) throw new Error("userHardLimit must be null or a non-negative integer.");
+    this.checkpoint = checkpoint;
+    this.limit = userHardLimit;
     this.used = 0;
     this.metrics = emptyMetrics();
+    this.attempts = new Set();
   }
 
-  consume() {
-    if (this.used >= this.limit) return { allowed: false, terminalState: "blocked" };
+  consume({ cause, evidence, approach }) {
+    if ([cause, evidence, approach].some((value) => typeof value !== "string" || !value.trim())) throw new Error("Record the cause, evidence and repair approach.");
+    if (this.limit !== null && this.used >= this.limit) return { allowed: false, terminalState: "blocked", reason: "user-hard-limit" };
+    const attempt = JSON.stringify([cause, evidence, approach]);
+    if (this.attempts.has(attempt)) return { allowed: false, terminalState: "blocked", reason: "replan-no-new-evidence" };
+    this.attempts.add(attempt);
     this.used += 1;
-    return { allowed: true, used: this.used, limit: this.limit };
+    const checkpointDue = this.used % this.checkpoint === 0;
+    if (checkpointDue) this.metrics.repairCheckpointCount += 1;
+    return { allowed: true, used: this.used, limit: this.limit, checkpointDue };
   }
 
   extend({ userApproved, namedRisk, newLimit }) {
-    if (!userApproved || !namedRisk || !Number.isInteger(newLimit) || newLimit <= this.limit) return false;
+    if (this.limit === null || !userApproved || !namedRisk || !Number.isInteger(newLimit) || newLimit <= this.limit) return false;
     this.limit = newLimit;
     this.metrics.budgetExtensionCount += 1;
     return true;

@@ -28,7 +28,7 @@ The envelope's scope hash binds every child and Track gate field to the reposito
 
 ## Outcome
 
-<One observable result. Describe behavior, not implementation ambition.>
+<One observable result. Describe the complete coherent outcome across configuration/runtime, tests, documentation and in-scope repairs; do not split by filename or command.>
 
 ## Acceptance Criteria
 
@@ -76,6 +76,9 @@ The envelope's scope hash binds every child and Track gate field to the reposito
 - **Broad-check gate:** `<phase|final|repository hard threshold|explicit requirement|none>`
 - **Reusable evidence:** `<matching validation-ledger entry IDs, or none>`
 - **External validation:** `<none, or Coordinator-owned deadline, poll interval, max polls, and terminal evidence>`
+- **Requested completion tier:** `<code|deployed|live|business, or local-only>`
+- **Target environment:** `<named environment when the tier is deployed, live, or business; otherwise not applicable>`
+- **Minimum normal path:** `<smallest normal-path evidence required for the requested tier, or local acceptance path>`
 
 ### Evidence Ledger
 
@@ -83,15 +86,15 @@ The envelope's scope hash binds every child and Track gate field to the reposito
 | -- | --------------------- | ----------------------- | ------------------------- | ------ | ---- | ------ |
 | `<id>` | `<exact check>` | `<hash>` | `<hash>` | `<passed|failed|blocked>` | `<UTC>` | `<executed|reused>` |
 
-### Budget
+### Repair And Hard-Limit Ledger
 
-- **Corrective cycles:** `<used/limit; initial implementation starts at 0/1 for Quick or 0/2 for Scoped/Track>`
-- **Parent review-fix cycle:** `<reserved/limit; initial is 0/1 for Quick or 0/2 for Scoped/Track>`
+- **Repair counts:** `<corrective/review-fix counts; diagnostic checkpoints after one Quick or two Scoped/Track cycles>`
+- **Explicit user hard limit:** `<none or exact named limit and authority; carries across Sessions, Work Orders, phases and workers>`
 - **Broader validation trigger:** `<named shared contract or none>`
 - **Time or external-service limit:** `<limit or not applicable>`
 - **Request ledger:** `<original request ID, start time, elapsed time, checkpoint, and any user-set hard deadline; inherited across fixes and units>`
 
-Before an additional check, name its unresolved acceptance or introduced regression, evidence gap, and delivery decision. Omit checks that cannot change acceptance. Phase/final labels alone do not justify reruns. At a soft checkpoint report progress and the smallest remaining path; only missing decisions/capabilities or exhausted hard limits block continuation. Return timing and check counts without inventing unavailable measurements.
+Before an additional check, name its unresolved acceptance or introduced regression, evidence gap, and delivery decision. Omit checks that cannot change acceptance. Phase/final labels alone do not justify reruns. At a diagnostic checkpoint report progress and the smallest remaining path; only missing decisions/capabilities, repeated same-cause failure with unchanged evidence, or an exhausted explicit user hard limit block continuation. Return timing and check counts without inventing unavailable measurements.
 
 Do not run a full suite, broad audit, browser matrix, integration environment, or external-service check unless required above or the named trigger occurs.
 
@@ -106,10 +109,10 @@ The Coordinator owns external polling. An Executor does not poll or wait for pro
 ## Stop Conditions
 
 - The next edit exceeds Owned scope or conflicts with unrelated work.
-- Required validation fails after the corrective-cycle budget.
+- An explicit user hard limit is exhausted, or repeated same-cause failure with unchanged evidence requires a replan.
 - Completion requires an unapproved destructive, external, migration, dependency, architecture, security, or public-contract change.
 - Acceptance is satisfied and remaining work is optional improvement.
 
 ## Return Contract
 
-Return the completed `templates/result.md` when supplied. Otherwise return these sections: Status, Summary, Changed Files, Acceptance, Validation and corrective cycles, Discoveries, Scope Deviations, Residual Risk, and Recommended Next Action. Do not claim completion without acceptance and required-check evidence.
+Return the completed `templates/result.md` when supplied. Otherwise return these sections: Status, Summary, Changed Files, Acceptance and requested-tier evidence, Validation and repair counts, Git closure, Discoveries, Scope Deviations, Residual Risk, and Recommended Next Action. Do not claim completion without acceptance and required-tier evidence.

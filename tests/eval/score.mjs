@@ -292,7 +292,7 @@ export function deriveCandidateRoutes(source, baseline) {
       loaded: uniqueSorted([...coordinator, ...templates, ...worker]),
       required: uniqueSorted([...coordinator, ...templates, ...worker]).filter((path) => !baselineRoute?.unnecessary?.includes(path)),
       targetReductionPercent: baselineRoute?.targetReductionPercent ?? 0,
-      expected: { candidateProtocol: true, dispatch: route.dispatch },
+      expected: { candidateProtocol: true, dispatch: route.dispatch, frozenComparisonAvailable: Boolean(baselineRoute) },
       parserFailures
     };
   });

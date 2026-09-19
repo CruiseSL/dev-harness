@@ -132,18 +132,32 @@ test("attestation detects untracked content changes with identical status", () =
   assert.ok(verification.mismatches.includes("scopeFingerprint"));
 }));
 
-test("attestation hashes an untracked symlink without reading its target", () => withFixture((worktree) => {
+test("attestation hashes an explicitly declared ignored file", () => withFixture((worktree) => {
+  mkdirSync(join(worktree, "runtime"));
+  writeFileSync(join(worktree, ".gitignore"), "runtime/\n");
+  writeFileSync(join(worktree, "runtime", "config.json"), "{\"mode\":\"local\"}\n");
+  git(worktree, ["add", ".gitignore"]);
+  git(worktree, ["commit", "-m", "ignore runtime config"]);
+
+  const attestation = capture(worktree, ["runtime/config.json"]);
+  assert.equal(status(worktree), "");
+  writeFileSync(join(worktree, "runtime", "config.json"), "{\"mode\":\"changed\"}\n");
+
+  const verification = verifyExecutionAttestation({ worktree, attestation });
+  assert.ok(verification.mismatches.includes("relevantUntrackedFingerprint"));
+  assert.ok(verification.mismatches.includes("scopeFingerprint"));
+}));
+
+test("attestation rejects a declared symlink instead of hashing an unresolved target", () => withFixture((worktree) => {
   const outside = mkdtempSync(join(tmpdir(), "dev-harness-outside-"));
   try {
     const target = join(outside, "secret.txt");
     writeFileSync(target, "first secret\n");
     symlinkSync(target, join(worktree, "scratch", "link.txt"));
-    const attestation = capture(worktree, ["scratch"]);
-    writeFileSync(target, "changed secret\n");
-    assert.equal(verifyExecutionAttestation({ worktree, attestation }).matches, true);
-    rmSync(join(worktree, "scratch", "link.txt"));
-    symlinkSync(`${target}.different`, join(worktree, "scratch", "link.txt"));
-    assert.ok(verifyExecutionAttestation({ worktree, attestation }).mismatches.includes("relevantUntrackedFingerprint"));
+    assert.throws(
+      () => capture(worktree, ["scratch"]),
+      /Unsupported declared scope symlink: scratch\/link\.txt; declare the real in-worktree path instead\./
+    );
   } finally {
     rmSync(outside, { recursive: true, force: true });
   }

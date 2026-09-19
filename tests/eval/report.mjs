@@ -17,6 +17,7 @@ export function renderStaticReport(report, { baselineDifferences = [], candidate
       `- ${route.id}: coordinator ${formatBytes(route.coordinatorProtocolBytes)}; worker ${formatBytes(route.workerSystemBytes)}; templates ${formatBytes(route.templateBytes)}; combined ${formatBytes(route.combinedStaticBytes)}${extras}`
     );
     if (route.laterFiles?.length) lines.push(`  Later review/final stages: ${route.laterFiles.map((file) => file.path).join(", ")}; full delivery declaration ${formatBytes(route.fullDeliveryBytes)}. Initial-stage savings are not full-delivery savings.`);
+    if (route.expected?.frozenComparisonAvailable === false) lines.push("  Candidate-only route: no frozen baseline reduction comparison.");
   }
 
   lines.push("", "Safety:");

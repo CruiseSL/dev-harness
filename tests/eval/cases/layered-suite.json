@@ -1,32 +1,76 @@
 {
   "schemaVersion": 1,
   "staticCases": [
-    { "id": "explicit-status-without-classification", "type": "route", "route": "explicit-status" },
-    { "id": "read-only-current-diff-review", "type": "route", "route": "explicit-review-current-diff" },
-    { "id": "quick-single-file-change", "type": "route", "route": "quick-single-file-change" },
-    { "id": "quick-unrelated-dirty-worktree", "type": "route", "route": "quick-unrelated-dirty-worktree" },
-    { "id": "scoped-cross-module-change", "type": "route", "route": "scoped-cross-module-change" },
-    { "id": "scoped-fallback-without-child-selection", "type": "route", "route": "scoped-no-explicit-child-selection" },
-    { "id": "track-missing-child-configuration", "type": "route", "route": "track-missing-child-configuration" },
-    { "id": "track-mismatched-named-agent", "type": "route", "route": "track-named-agent-mismatch" },
-    { "id": "track-matching-named-agent", "type": "route", "route": "track-matching-named-agent" },
+    {
+      "id": "explicit-status-without-classification",
+      "type": "route",
+      "route": "explicit-status"
+    },
+    {
+      "id": "read-only-current-diff-review",
+      "type": "route",
+      "route": "explicit-review-current-diff"
+    },
+    {
+      "id": "quick-single-file-change",
+      "type": "route",
+      "route": "quick-single-file-change"
+    },
+    {
+      "id": "quick-unrelated-dirty-worktree",
+      "type": "route",
+      "route": "quick-unrelated-dirty-worktree"
+    },
+    {
+      "id": "scoped-cross-module-change",
+      "type": "route",
+      "route": "scoped-cross-module-change"
+    },
+    {
+      "id": "scoped-fallback-without-child-selection",
+      "type": "route",
+      "route": "scoped-no-explicit-child-selection"
+    },
+    {
+      "id": "track-missing-child-configuration",
+      "type": "route",
+      "route": "track-missing-child-configuration"
+    },
+    {
+      "id": "track-mismatched-named-agent",
+      "type": "route",
+      "route": "track-named-agent-mismatch"
+    },
+    {
+      "id": "track-matching-named-agent",
+      "type": "route",
+      "route": "track-matching-named-agent"
+    },
     {
       "id": "resume-active-track-unit",
       "type": "contains-all",
       "path": "references/architect/contracts.md",
-      "includes": ["active units resume before pending units"]
+      "includes": [
+        "active units resume before pending units"
+      ]
     },
     {
       "id": "phase-verification-aliases",
       "type": "contains-all",
       "path": "references/architect/contracts.md",
-      "includes": ["as equivalent phase gates", "New plans emit the upstream v1 form"]
+      "includes": [
+        "as equivalent phase gates",
+        "New plans emit the upstream v1 form"
+      ]
     },
     {
       "id": "finalization-blocker-stays-in-progress",
       "type": "contains-all",
-      "path": "references/architect/contracts.md",
-      "includes": ["Track finalization is a dedicated unit", "all implementation units are accepted"]
+      "path": "references/architect/track-runtime.md",
+      "includes": [
+        "required checks",
+        "in_progress"
+      ]
     },
     {
       "id": "commit-requires-current-authorization",
@@ -39,27 +83,52 @@
       "safetyCase": "unapproved-external-and-destructive-actions-stop"
     },
     {
-      "id": "review-fix-budget-exhaustion",
+      "id": "user-hard-limit-and-progress-checkpoints",
       "type": "contains-all",
       "path": "references/architect/contracts.md",
-      "includes": ["Reaching the limit is a hard `blocked` or `partial` stop.", "Only the current user may explicitly approve a larger limit"]
+      "includes": [
+        "Only an explicit current-user hard limit is a hard",
+        "legacy framework defaults are not user-set limits",
+        "A third meaningful in-scope repair does not require user approval"
+      ]
     },
     {
       "id": "legacy-metadata-and-plan-grammar",
       "type": "contains-all",
       "path": "references/orchestration.md",
-      "includes": ["Version 1 files with a `profiles` object are legacy.", "replace the legacy shape with version 2"]
+      "includes": [
+        "Version 1 files with a `profiles` object are legacy.",
+        "replace the legacy shape with version 2"
+      ]
     },
     {
       "id": "duplicate-track-ids-and-unsafe-links",
       "type": "contains-all",
       "path": "references/architect/contracts.md",
-      "includes": ["Reject duplicate IDs", "unsafe links"]
+      "includes": [
+        "Reject duplicate IDs",
+        "unsafe links"
+      ]
     },
     {
       "id": "standalone-brainstorming-stays-outside-architect",
       "type": "route",
       "route": "standalone-brainstorming"
+    },
+    {
+      "id": "track-local-execution",
+      "type": "route",
+      "route": "track-local-execution"
+    },
+    {
+      "id": "track-native-executor",
+      "type": "route",
+      "route": "track-native-executor"
+    },
+    {
+      "id": "local-independent-review",
+      "type": "route",
+      "route": "local-independent-review"
     }
   ],
   "representativeLiveRoutes": [

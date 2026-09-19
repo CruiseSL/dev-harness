@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Review a Track, one Track unit, current changes, or an explicit revision range against durable intent and repository evidence. Review is read-only unless the Coordinator or user authorizes named findings.
+Review a Track, one coherent delivery batch, current changes, or an explicit revision range against durable intent and repository evidence. Review is strictly read-only. The existing developer/Executor or Coordinator-local owner applies any Coordinator-approved finding.
 
 ## Scope
 
@@ -12,7 +12,7 @@ Supported scopes:
 
 - Exact Track ID or exact unique Track description.
 - Sole active Track when none is named.
-- One Track unit selected by Implement.
+- One coherent delivery batch selected by Implement.
 - Explicit `current` staged and unstaged changes.
 - Explicit Git revision range.
 
@@ -30,8 +30,6 @@ Derive Track diff in this order:
 4. Current changes only after explicit selection or when reviewing the active unit baseline.
 
 Record provenance as `explicit`, `recorded`, `inferred`, or `current`, with confidence `high` or `user-confirmed`. If no defensible diff exists, stop.
-
-Review large diffs iteratively by relevant source, config, test, and documentation chunks. Chunking is not a scope expansion.
 
 ## Analysis
 
@@ -62,10 +60,10 @@ Include:
 ## Fixes And Recording
 
 - Review never authorizes edits by itself.
-- Coordinator-approved Blocking fixes become bounded Work Orders and consume the active review-fix budget.
+- Coordinator-approved findings become bounded fixes for the existing developer/Executor or Coordinator-local owner and are recorded in the active repair ledger.
 - Relevant findings require explicit approval and must not displace required fixes.
 - Never fix Scope-change, Pre-existing, Out-of-scope, or Theoretical findings in the current run.
-- Rerun affected checks and review the cumulative diff against original Track acceptance.
+- Rerun affected checks and review the cumulative diff against original Track acceptance. Do not create an artificial finalization Work Order solely to close the review.
 
 When the user explicitly requests durable recording, append or reuse a `## Phase: Review Fixes` plan section and record accepted fixes with `no-commit` or an explicitly authorized commit SHA. Recording does not itself authorize a commit.
 
@@ -80,4 +78,4 @@ Cleanup is outside review unless explicitly requested and exactly confirmed unde
 
 ## Stop Conditions
 
-Stop when scope remains ambiguous, Track paths or artifacts are unsafe, no reviewable diff exists, a required check cannot run, a fix exceeds reported findings or budget, worktree isolation fails, or review and authorized follow-up are complete.
+Stop when scope remains ambiguous, Track paths or artifacts are unsafe, no reviewable diff exists, a required check cannot run, a fix exceeds reported findings or an explicit user hard limit, worktree isolation fails, or review and authorized follow-up are complete.

@@ -1,6 +1,6 @@
 # Track Gate Runtime
 
-Use this pack after the router identifies one approved Track. First choose local execution or delegation. A small bounded unit may run in the Coordinator current Session after checking acceptance, baseline and ownership; it does not need child configuration or a Work Order. Do not take files from an active Executor. The configuration gate below applies only when delegation is selected, before its Work Order or child writes.
+Use this pack after the router identifies one approved Track. First choose a local or delegated coherent delivery batch. A small bounded batch may run in the Coordinator current Session after checking acceptance, baseline and ownership; it does not need child configuration or a Work Order. Do not take files from an active Executor. The configuration gate below applies only when delegation is selected, before its Work Order or child writes.
 
 ## Required Configuration
 

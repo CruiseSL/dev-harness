@@ -37,7 +37,43 @@ export const reviewClosureCase = {
   probe: deliveryCases.find(({id}) => id === "bounded-pagination").probe,
   priorValidation: true
 };
-const registeredCases = [...deliveryCases, reviewClosureCase];
+// Exercises one coherent developer batch, not live cloud or full Track lifecycle.
+export const scheduledReportCase = {
+  id: "scheduled-report-batch", level: "Integrated delivery batch",
+  owned: ["src/config.mjs", "src/report.mjs", "src/scheduled.mjs", "README.md"],
+  prompt: "Implement one complete scheduled-report batch across config, reporting and the scheduled entrypoint; keep one owner through tests and repairs. Export loadConfig(env) from config.mjs returning {destination: env.REPORT_DESTINATION, dryRun: env.DRY_RUN === 'true'}. Export summarize(rows) from report.mjs returning {total, bySource}, summing row.count by row.source. Export scheduled(event, env, deps) from scheduled.mjs. event.scheduledTime is an epoch-millisecond timestamp and may include nonzero seconds. The report day is the previous UTC date (YYYY-MM-DD). deps.collect(day) returns rows; deps.deliver(destination, report) is an injected local fake; deps.delivered is a Set of keys `${day}:${destination}`. Load config, skip an already-delivered key with {status:'duplicate',day} before collecting. Otherwise collect and build report {day,total,bySource}. In dry run return {status:'preview',report}, do not deliver or mark delivered. Otherwise await deliver, then mark the key and return {status:'delivered',report}. A failed delivery must not mark success. README.md names src/scheduled.mjs as the normal entrypoint and includes the exact evidence labels: Evidence tier: local fixture; and Unverified: cloud scheduling and real delivery. Supported input is valid configuration and rows with string source/numeric count; no new validation framework or external resources. This is code-level acceptance of a developer delivery batch, not authorization to deploy or send. Use the supplied focused check and close after scoped review.",
+  files: {
+    "src/config.mjs": "export function loadConfig(env) { return env; }\n",
+    "src/report.mjs": "export function summarize(rows) { return rows; }\n",
+    "src/scheduled.mjs": "export async function scheduled(event, env, deps) { return {status: 'todo'}; }\n",
+    "README.md": "Scheduled report fixture. Implementation pending.\n"
+  },
+  probe: `const {loadConfig} = await import(resolve("src/config.mjs"));
+const {summarize} = await import(resolve("src/report.mjs"));
+const {scheduled} = await import(resolve("src/scheduled.mjs"));
+const env = {REPORT_DESTINATION:'fixture-only',DRY_RUN:'false'};
+assert.deepEqual(loadConfig(env), {destination:'fixture-only',dryRun:false});
+assert.deepEqual(loadConfig({...env,DRY_RUN:'true'}), {destination:'fixture-only',dryRun:true});
+const rows = [{source:'a',count:2},{source:'b',count:3},{source:'a',count:4}];
+assert.deepEqual(summarize(rows), {total:9,bySource:{a:6,b:3}});
+const event = {scheduledTime:Date.parse('2026-09-08T01:20:19Z')};
+const report = {day:'2026-09-07',total:9,bySource:{a:6,b:3}};
+const calls = []; const delivered = new Set();
+const deps = {delivered,collect:async day=>{calls.push(['collect',day]);return rows;},deliver:async (destination,value)=>{calls.push(['deliver',destination,value]);}};
+assert.deepEqual(await scheduled(event,{...env,DRY_RUN:'true'},deps),{status:'preview',report});
+assert.deepEqual(calls,[['collect','2026-09-07']]); assert.equal(delivered.size,0); calls.length=0;
+assert.deepEqual(await scheduled(event,env,deps),{status:'delivered',report});
+assert.deepEqual(calls,[['collect','2026-09-07'],['deliver','fixture-only',report]]);
+assert.ok(delivered.has('2026-09-07:fixture-only')); calls.length=0;
+assert.deepEqual(await scheduled(event,env,deps),{status:'duplicate',day:'2026-09-07'}); assert.deepEqual(calls,[]);
+const failedKeys = new Set();
+await assert.rejects(scheduled(event,env,{...deps,delivered:failedKeys,deliver:async()=>{throw new Error('fixture failure');}}),/fixture failure/);
+assert.equal(failedKeys.size,0);
+const {readFileSync} = await import('node:fs');
+const readme = readFileSync(resolve('README.md'),'utf8');
+for (const label of ['src/scheduled.mjs','Evidence tier: local fixture','Unverified: cloud scheduling and real delivery']) assert.ok(readme.includes(label), 'Missing README acceptance: ' + label);`
+};
+const registeredCases = [...deliveryCases, reviewClosureCase, scheduledReportCase];
 
 const prelude = 'import assert from "node:assert/strict"; import { resolve } from "node:path";\n';
 const hash = (content) => createHash("sha256").update(content).digest("hex");
@@ -125,7 +161,21 @@ export function startDelivery(root, id, now = new Date()) {
   return { id, startedAt: receipt.startedAt, prompt: run.prompt, workspace: run.workspace };
 }
 
-const countNames = ["childDispatchCount", "reviewerDispatchCount", "validationExecutionCount", "validationReuseCount", "broadCheckCount", "reviewFixCount", "externalPollCount"];
+const countNames = ["childDispatchCount", "reviewerDispatchCount", "validationExecutionCount", "validationReuseCount", "broadCheckCount", "reviewFixCount", "externalPollCount", "humanInterventionCount", "modelResponseCount", "noncachedInputTokens", "outputTokens"];
+
+function runtimeIdentity(runtime) {
+  if (!runtime) return null;
+  const settings = [runtime.host, runtime.model, runtime.reasoning];
+  for (const role of ["executor", "reviewer"]) {
+    const value = runtime.roles?.[role];
+    if (value != null && [value.model, value.reasoning].some((entry) => typeof entry !== "string" || !entry.trim())) throw new Error(`runtime.roles.${role} needs observed model and reasoning.`);
+    settings.push(value == null ? null : [value.model, value.reasoning]);
+  }
+  // Historical observations remain readable, but missing role settings are
+  // unknown, not evidence that no developer or reviewer was involved.
+  if (!runtime.roles || ["executor", "reviewer"].some((role) => !Object.hasOwn(runtime.roles, role))) return null;
+  return JSON.stringify(settings);
+}
 
 export function assessDelivery(root, id, observations, now = new Date()) {
   const manifest = JSON.parse(readFileSync(join(root, "manifest.json")));
@@ -142,6 +192,7 @@ export function assessDelivery(root, id, observations, now = new Date()) {
   const metrics = {};
   const runtime = observations.runtime ?? null;
   if (runtime !== null && ["host", "model", "reasoning"].some((key) => typeof runtime[key] !== "string" || !runtime[key].trim())) throw new Error("runtime needs observed host, model and reasoning.");
+  runtimeIdentity(runtime);
   for (const name of countNames) {
     const value = observations[name] ?? null;
     if (value !== null && (!Number.isInteger(value) || value < 0)) throw new Error(`Invalid ${name}.`);
@@ -176,7 +227,7 @@ export function compareDeliveries(reports) {
     baseline: reports.filter((r) => r.caseId === id && r.side === "baseline"),
     candidate: reports.filter((r) => r.caseId === id && r.side === "candidate") }));
   const paired = byCase.every((entry) => entry.baseline.length === 1 && entry.candidate.length === 1);
-  const runtimeKey = (run) => run.runtime ? JSON.stringify([run.runtime.host, run.runtime.model, run.runtime.reasoning]) : null;
+  const runtimeKey = (run) => runtimeIdentity(run.runtime);
   const matchedRuntime = paired && byCase.every((entry) => runtimeKey(entry.baseline[0]) !== null && runtimeKey(entry.baseline[0]) === runtimeKey(entry.candidate[0]));
   const successfulPairs = paired && matchedRuntime && reports.length === deliveryCases.length * 2 && reports.every((run) => run.completed);
   return { ...sides, byCase, paired, matchedRuntime, speedComparisonEligible: successfulPairs,

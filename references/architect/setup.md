@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Initialize or resume durable project context under `architect/`. Setup creates core context only. It never creates, repairs, or mutates Track artifacts.
+Initialize or resume durable project context under `architect/`. Setup creates only genuinely missing material context or material explicitly requested by the user. Repository-native context may satisfy a context area through links or mappings in the existing index. Setup never creates, repairs, or mutates Track artifacts.
 
 Read `references/architect/contracts.md` first. Core readiness and path rules are authoritative there.
 
@@ -22,7 +22,7 @@ uninitialized
   -> core_ready
 ```
 
-A file is incomplete when absent, empty, or clearly an interrupted placeholder. Later files do not allow skipping an earlier prerequisite.
+A context area is incomplete when its mapped evidence is absent, empty, or clearly an interrupted placeholder. Later files do not allow skipping an earlier prerequisite, but an existing repository-native source can satisfy the area without a duplicate Architect file.
 
 ## Project Detection
 
@@ -46,13 +46,13 @@ Do not ask for facts already established by repository evidence or the user's re
 5. Adapt `references/architect/defaults/delivery.md` into `architect/workflow.md`. Repository commands and policies override defaults.
 6. Generate `architect/index.md` from `templates/architect/core-index.md`.
 
-For a clear Brownfield project, present product, guidelines, and stack as one review packet with distinct diffs and one `Approve all` or `Revise` decision. Split approvals only when a draft contains a material assumption or the user requests separate review. For Greenfield or materially uncertain context, ask focused questions before presenting the affected draft.
+For a clear Brownfield project, map existing product, guidelines, stack, code style, and delivery evidence first. Present only genuinely missing material context as one review packet with distinct diffs and one `Approve all` or `Revise` decision. Split approvals only when a draft contains a material assumption or the user requests separate review. For Greenfield or materially uncertain context, ask focused questions before presenting the affected draft.
 
 Copy or generate a style guide only after showing its source or draft. A repository-native direct child guide may be linked or copied as the project permits; never follow an external symlink.
 
 ## Approval Boundaries
 
-- Core writes require approval of the presented draft or diff.
+- Core writes require approval of the presented draft or diff when they are not already covered by clear implementation authorization.
 - Approval of one review packet covers only files explicitly shown in that packet.
 - Significant inferred stack corrections require user approval.
 - Customized delivery policy requires approval of its changed choices.
@@ -60,9 +60,9 @@ Copy or generate a style guide only after showing its source or draft. A reposit
 
 ## Run
 
-1. Audit the six core criteria and announce maturity plus the earliest incomplete state.
+1. Audit the six context areas and existing index mappings, then announce maturity plus the earliest incomplete state.
 2. Read existing core context and bounded repository evidence.
-3. Draft only missing or incomplete artifacts; preserve approved content.
+3. Draft only missing or incomplete material context; preserve approved content and repository-native sources.
 4. Present the minimal approval packet and revise until accepted.
 5. Write approved artifacts with reviewable edits and validate links and non-empty content.
 6. Report created and preserved files.

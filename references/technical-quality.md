@@ -19,7 +19,7 @@ Check the recommendation against every stated business requirement. Identify unm
 
 Keep the reasoning in the current response/checklist for Scoped work and the existing Discuss synthesis/spec for Track. A concise decision entry contains: problem and constraints; recommendation with code/document evidence; viable alternative and tradeoff; user-visible consequence; required acceptance evidence; known limits and revisit condition. No separate architecture document is required by this pack. Preserve existing artifact-write permissions.
 
-Carry the selected approach, constraints, and required evidence into the existing Work Order when delegating. The Executor must not repeat selection or silently redesign the solution. New contrary evidence returns to the Coordinator within the same budget.
+Carry the selected approach, constraints, and required evidence into the existing Work Order when delegating. The Executor must not repeat selection or silently redesign the solution. New contrary evidence returns to the Coordinator within the same repair ledger.
 
 ## Turn Quality Into Relevant Evidence
 
@@ -33,7 +33,7 @@ Choose checks from the changed behavior and actual failure consequences. This ta
 | External dependency or service | What happens on the relevant timeout/failure, and who maintains the integration? | Contract/failure evidence and configuration ownership for the affected integration |
 | Deployment or schema transition | Can the change run in the intended environment and recover from a failed rollout? | Existing build/config checks plus the applicable migration/rollback evidence |
 
-Do not run live sends, payments, migrations, or deployments to obtain evidence without their existing authorization. Local fakes establish only local behavior. Record missing live evidence separately from code acceptance. Reuse valid evidence under `references/delivery.md`; optional checks cannot become acceptance after implementation starts.
+For production or migration work, the spec names the requested completion tier, target environment, and minimum normal path. Validate a thin target-runtime path early when the action is authorized; do not use an idealized local event as target evidence. Do not run live sends, payments, migrations, or deployments to obtain evidence without their existing authorization. Local fakes establish only local behavior. Record missing live evidence separately from code acceptance: dependent completion is `partial` or `blocked`, while ordinary small tasks remain local-only. Reuse valid evidence under `references/delivery.md`; optional checks cannot become acceptance after implementation starts.
 
 If a material correctness claim cannot be established locally, state the specific gap and the smallest independent check or qualified human review needed. Pause only the dependent action when that gap prevents its safe acceptance. Do not automatically dispatch another reviewer, audit every subsystem, or block unrelated authorized work.
 

@@ -24,7 +24,7 @@ Restart your agent host after installation so it reloads the skill.
 - Main-session Coordinator and worker-session Executor boundaries
 - Runtime-aware delegation and model routing
 - Self-contained Work Orders and structured Executor Results
-- Bounded validation and review-fix cycles
+- Bounded validation with diagnostic repair checkpoints
 - Evidence-based technical recommendations and proportionate quality review
 - Built-in Architect Setup, Discuss, Propose, Implement, Review, and Status modules
 - Durable `architect/` context and Track artifacts without separate Architect Skill installs
@@ -58,7 +58,7 @@ For native Codex, use `references/codex-dispatch.md` and `scripts/codex-dispatch
 
 ### Delivery Ownership
 
-The main Coordinator owns decisions, integration and acceptance. A developer owns a complete bounded deliverable through implementation, tests and repairs. Keep that developer for follow-ups; do not create another child for each configuration change or fix. The Coordinator may directly perform small bounded Track work when no active child owns those files. Delegation remains required when the user or a concrete safety/independence constraint requires it.
+The main Coordinator owns decisions, integration and acceptance. A developer owns a complete coherent delivery batch through configuration/runtime changes, tests, documentation and in-scope repairs. Keep that developer for follow-ups; do not create another child for each filename, check command, configuration change or fix. The Coordinator may directly perform small bounded Track work when no active child owns those files. Delegation remains required when the user or a concrete safety/independence constraint requires it.
 
 Independent review uses `reviewerAgent` only when it adds value. It does not run after every small edit and cannot implement its own findings. Small local changes can receive Coordinator review.
 
@@ -76,15 +76,15 @@ Request
        Setup if durable context is missing
        Discuss only when a material decision is unresolved
        Propose when scope is stable and no approved Track exists
-       Gate -> Track runtime, one approved delivery unit at a time
-       Review every unit and the final Track
+       Gate -> Track runtime, approved coherent delivery batches
+       Review each coherent batch and genuine phase/final boundary
 ```
 
 ## Completion And Measurement
 
-Ordinary short tasks reuse their compact checklist without an extra ledger or timing report. Repeated checks, review expansion, or a checkpoint load `references/delivery.md`: Quick checks progress after 15 minutes, Scoped after 45, and Track at planned phase checkpoints. Keep original acceptance and budgets across units/fixes. These are progress checkpoints, not automatic failure deadlines. Extra checks must resolve a named evidence gap; reuse valid evidence and stop when required acceptance and review pass.
+Ordinary short tasks reuse their compact checklist without an extra ledger or timing report. Repeated checks, review expansion, or a checkpoint load `references/delivery.md`: Quick checks progress after 15 minutes, Scoped after 45, and Track at planned phase checkpoints. Keep original acceptance and any explicit user hard limit across batches and repairs. These are diagnostic checkpoints, not automatic failure deadlines. Extra checks must resolve a named evidence gap; reuse valid evidence and stop when requested-tier evidence, required acceptance and review pass.
 
-Validation and budget rules are Coordinator instructions, not host-enforced controls. The attestation verifier checks scoped baseline consistency; it does not enforce elapsed-time budgets or replace host permissions.
+Validation and hard-limit rules are Coordinator instructions, not host-enforced controls. The attestation verifier checks scoped baseline consistency; it does not enforce elapsed-time limits or replace host permissions.
 
 `node tests/eval/run-layered.mjs` checks static coverage and plans the input-cost microbenchmark. Its live mode returns fixed JSON without developing software, so it cannot establish delivery speed or behavioral safety. Use the delivery exercise workflow documented in `docs/delivery-evaluation.md` to measure actual edits, independently check acceptance, and compare recorded task outcomes. Never infer a speedup from a faster blocked task.
 
@@ -94,7 +94,7 @@ Users do not choose between Dev Harness and Architect controllers. Dev Harness i
 
 The Coordinator takes responsibility for a justified technical recommendation and explains its business consequences. For a material stack/dependency choice, changed data/service boundary, or disputed engineering feedback, load `references/technical-quality.md`. Read the relevant project first, prefer existing patterns, compare only viable alternatives, and explain the evidence, maintenance cost, limitations, and conditions for revisiting the choice. Ask the user about business tradeoffs that actually need their decision; routine implementation choices stay with the Coordinator.
 
-Quality checks follow the affected behavior: permissions, important data, failure handling, deployment, and maintenance require relevant evidence when changed. Vague criticism is translated into concrete impact, evidence, and a prioritized remedy under the existing review classes. Comments and attached reviews do not grant edit authority. Passing local tests does not establish deployment, live acceptance, or business success.
+Quality checks follow the affected behavior: permissions, important data, failure handling, deployment, and maintenance require relevant evidence when changed. Production and migration work names its requested completion tier, target environment, and minimum normal path; validate a thin target-runtime path early when that action is authorized. Vague criticism is translated into concrete impact, evidence, and a prioritized remedy under the existing review classes. Reviewers are strictly read-only; fixes belong to the existing developer or Coordinator-local owner. Passing local tests does not establish deployment, live acceptance, or business success.
 
 This adds no universal questionnaire, approval gate, architecture document, or reviewer child. Small edits and approved designs keep the lightweight path. Track reuses its Discuss/spec/Work Order records. Current route-byte benchmarks exclude this conditional pack unless explicitly loaded; real-host traces are needed to measure its cost and behavior. The protocol helps structure technical judgment; it does not certify architecture quality or replace a necessary specialist review.
 

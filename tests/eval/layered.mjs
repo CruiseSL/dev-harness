@@ -1,7 +1,7 @@
 import { aggregateLivePilot } from "./live.mjs";
 
 export const LAYERED_EVALUATION_SCHEMA_VERSION = 1;
-export const STATIC_CORE_CASE_COUNT = 18;
+export const STATIC_CORE_CASE_COUNT = 21;
 export const REPRESENTATIVE_LIVE_ROUTE_COUNT = 4;
 
 function unique(values) {

@@ -9,7 +9,7 @@ import {
   classifyThroughputCase,
   detectV25ThroughputFindings,
   externalSendDecision,
-  FixBudget,
+  RepairProgress,
   planDispatch,
   pollExternal,
   throughputMetricNames,
@@ -66,13 +66,25 @@ test("one-recipient internal canary is Scoped and retains exact send approval", 
   assert.deepEqual(externalSendDecision({ exactAuthorization: true }), { allowed: true, owner: "Coordinator" });
 });
 
-test("Track units merge only across identical bounded interfaces", () => {
-  const base = { ownership: ["a"], acceptance: ["x"], validation: ["t"], rollbackBoundary: "r" };
+test("Track dispatch follows ownership and independent review also counts after local implementation", () => {
+  assert.equal(planDispatch({level: "Track", implementationOwner: "Coordinator"}).dispatch, false);
+  assert.equal(planDispatch({level: "Track", implementationOwner: "Executor"}).dispatch, true);
+  assert.equal(planDispatch({level: "Track", implementationOwner: "Coordinator", userRequestedIsolation: true}).dispatch, true);
+  const localReview = planDispatch({level: "Scoped", reviewerIndependent: true});
+  assert.equal(localReview.metrics.childDispatchCount, 0);
+  assert.equal(localReview.metrics.reviewerDispatchCount, 1);
+});
+
+test("one approved delivery batch combines complementary checks while preserving meaningful gates", () => {
+  const base = { outcomeId: "cloud-report", approvalId: "approved-local", owner: "luna", withinApprovedScope: true, ownership: ["a"], acceptance: ["x"], validation: ["t"], rolloutBoundary: "local", rollbackBoundary: "r" };
   assert.equal(canMergeTrackUnits(base, { ...base }), true);
-  assert.equal(canMergeTrackUnits(base, { ...base, ownership: ["b"] }), false);
-  assert.equal(canMergeTrackUnits(base, { ...base, acceptance: ["y"] }), false);
-  assert.equal(canMergeTrackUnits(base, { ...base, validation: ["other-test"] }), false);
+  assert.equal(canMergeTrackUnits(base, { ...base, ownership: ["b"], acceptance: ["y"], validation: ["other-test"] }), true);
   assert.equal(canMergeTrackUnits(base, { ...base, rollbackBoundary: "other" }), false);
+  assert.equal(canMergeTrackUnits(base, { ...base, approvalId: "production" }), false);
+  assert.equal(canMergeTrackUnits(base, { ...base, owner: "other-worker" }), false);
+  assert.equal(canMergeTrackUnits(base, { ...base, requiresSeparateGate: true }), false);
+  assert.equal(canMergeTrackUnits(base, { ...base, withinApprovedScope: false }), false);
+  assert.equal(canMergeTrackUnits({}, {}), false);
 });
 
 test("bookkeeping is Coordinator-owned with zero child dispatches", () => {
@@ -101,15 +113,27 @@ test("external polling stops at max polls without child extension", () => {
   assert.deepEqual({ state: result.terminalState, polls: result.metrics.externalPollCount, children: result.childDispatchCount }, { state: "blocked", polls: 3, children: 0 });
 });
 
-test("hard fix budget rejects 2/2 and only current-user approval extends it", () => {
-  const budget = new FixBudget(2);
-  assert.equal(budget.consume().allowed, true);
-  assert.equal(budget.consume().allowed, true);
-  assert.equal(budget.consume().allowed, false);
+test("repair checkpoints allow changed evidence beyond two cycles and reject blind repetition", () => {
+  const progress = new RepairProgress();
+  const attempt = (evidence) => ({cause: "runtime-start", evidence, approach: "repair-entrypoint"});
+  assert.equal(progress.consume(attempt("missing-module")).allowed, true);
+  assert.equal(progress.consume(attempt("permission-error")).checkpointDue, true);
+  assert.equal(progress.consume(attempt("native-event-shape")).allowed, true);
+  assert.equal(progress.consume(attempt("native-event-shape")).reason, "replan-no-new-evidence");
+  assert.equal(progress.used, 3);
+  assert.equal(progress.metrics.repairCheckpointCount, 1);
+});
+
+test("only an explicit user hard budget stops progressing repairs at its limit", () => {
+  const budget = new RepairProgress({userHardLimit: 2});
+  const attempt = (n) => ({cause: "runtime", evidence: `failure-${n}`, approach: "fix"});
+  assert.equal(budget.consume(attempt(1)).allowed, true);
+  assert.equal(budget.consume(attempt(2)).allowed, true);
+  assert.equal(budget.consume(attempt(3)).reason, "user-hard-limit");
   assert.equal(budget.extend({ userApproved: false, namedRisk: "finding-a", newLimit: 3 }), false);
   assert.equal(budget.extend({ userApproved: true, namedRisk: "finding-a", newLimit: 3 }), true);
   assert.equal(budget.metrics.budgetExtensionCount, 1);
-  assert.equal(budget.consume().allowed, true);
+  assert.equal(budget.consume(attempt(3)).allowed, true);
 });
 
 test("throughput output exposes every required metric", () => {
@@ -120,6 +144,7 @@ test("throughput output exposes every required metric", () => {
     "validationReuseCount",
     "broadCheckCount",
     "externalPollCount",
+    "repairCheckpointCount",
     "budgetExtensionCount",
     "bookkeepingChildCount"
   ]);

@@ -220,15 +220,15 @@ assert(router.includes("Do not ask `Which Architect skill should I use?`"), "Rou
 const contracts = read("references/architect/contracts.md");
 for (const text of [
   "Any Git commit",
-  "Explicit commit request",
+  "explicit current-user request or standing user/repository commit authorization already recorded",
   "Legacy metadata without `schema_version`",
   "User Manual Verification",
   "Phase Verification",
-  "Track finalization is a dedicated unit"
+  "Final review is a reconciliation boundary"
 ]) {
   assert(contracts.includes(text), `Missing shared contract: ${text}`);
 }
-assert(contracts.includes("Only the current user may explicitly approve a larger limit"), "Budget extension must require current-user approval");
+assert(contracts.includes("Only an explicit current-user hard limit is a hard"), "Only an explicit user hard limit may block continuation");
 
 const classification = read("references/classification.md");
 assert(classification.includes("One compact in-memory Coordinator checklist"), "Quick must avoid a full Work Order by default");
@@ -246,8 +246,8 @@ assert(
 assert(discuss.includes("Never repeat a settled question"), "Discuss must reuse existing brainstorming conclusions");
 
 const propose = read("references/architect/propose.md");
-assert(propose.includes("separate specification and plan approvals"), "Propose must preserve separate approvals");
-assert(propose.includes("No management write occurs before `plan_approved`"), "Propose must defer writes until approval");
+assert(propose.includes("spec, plan outline, and continuation mode in one concrete packet"), "Propose must present one concrete approval packet");
+assert(propose.includes("Clear implementation authorization may satisfy `plan_approved`"), "Propose must honor clear implementation authorization");
 assertOrdered(propose, ["spec_approved", "plan_approved", "track_created"], "Proposal state order is invalid");
 
 const implement = read("references/architect/implement.md");
@@ -262,9 +262,9 @@ assertOrdered(
   ["## Track Delegation Gate", "The gate must pass before delegated Work Order creation or child edits.", "## Unit Execution"],
   "Track gate must precede unit execution"
 );
-assertOrdered(implement, ["units_complete", "docs_synchronized", "finalization_review", "track_completed"], "Track must not complete before final review");
-assert(implement.includes("A blocker before step 8 leaves the Track `in_progress`"), "Finalization failure must preserve active Track state");
-assert(implement.includes("Adjacent pending units may be merged into one bounded Work Order only when"), "Compatible Track units must support bounded merging");
+assertOrdered(implement, ["units_complete", "docs_synchronized", "final_review", "track_completed"], "Track must not complete before final review");
+assert(implement.includes("A dependent missing live or business-tier evidence leaves the Track `partial` or `blocked`"), "Missing requested-tier evidence must preserve dependent incomplete state");
+assert(implement.includes("Adjacent pending units may be merged into one coherent Work Order when"), "Compatible Track units must support bounded merging");
 assert(implement.includes("never dispatch a bookkeeping-only child"), "Track bookkeeping must remain Coordinator-owned");
 
 const execution = read("references/execution.md");
@@ -273,15 +273,15 @@ for (const text of [
   "invalidate only entries whose recorded inputs or relevant files changed",
   "Documentation, lifecycle bookkeeping, or one changed test expectation does not trigger a broad validation bundle",
   "Executors do not wait or poll",
-  "Budget limits are hard stop conditions",
-  "Only the current user may explicitly approve a new limit"
+  "Repair counts are diagnostic evidence, not automatic stop conditions",
+  "Only an explicit current-user hard limit is a hard stop"
 ]) {
   assert(execution.includes(text), `Missing throughput execution contract: ${text}`);
 }
 
 const standardReview = read("references/review.md");
 assert(standardReview.includes("Do not create a new parent Work Order, Track, or Reviewer Session"), "Mechanical review fixes must stay in the active cycle");
-assert(standardReview.includes("Coordinator cannot turn `2/2` into `3/3` or `4/4`"), "Review budgets must not auto-expand");
+assert(standardReview.includes("Review-fix counts are soft diagnostic checkpoints"), "Review counts must remain diagnostic checkpoints");
 
 const scenarios = read("references/validation-scenarios.md");
 assert(scenarios.includes("## Track: Child Configuration Gate"), "Validation scenarios must cover the first Track-unit configuration gate");
@@ -303,7 +303,7 @@ assert(router.includes("Do not route a standalone request to brainstorm, ideate,
 assert(router.includes("skip Discuss entirely when that evidence establishes the Track direction"), "Router must reuse prior brainstorming evidence");
 assertOrdered(
   router,
-  ["The Coordinator selects local or delegated work", "Architect lifecycle selects and marks the unit", "The Coordinator or assigned Executor"],
+  ["The Coordinator selects a coherent local or delegated delivery batch", "Architect lifecycle selects and marks the unit", "The Coordinator or assigned Executor"],
   "Router must gate Track mutation before Executor work"
 );
 
@@ -332,12 +332,13 @@ assertOrdered(
 
 const trackRuntime = read("references/architect/track-runtime.md");
 for (const text of [
-  "resume the active approved unit",
+  "resume the active approved batch",
   "The Coordinator owns lifecycle bookkeeping",
   "self-contained Work Order",
   "Do not begin review before implementation evidence exists",
-  "Redispatch, a new Work Order, a new Session, or a later phase never resets a unit budget",
-  "requires exact current-conversation authorization"
+  "Redispatch, a new Work Order, a new Session, or a later phase never resets an explicit user hard limit",
+  "A local commit requires an explicit current-user request or a recorded standing user/repository commit rule",
+  "repository policy alone is not permission"
 ]) {
   assert(trackRuntime.includes(text), `Track runtime must include: ${text}`);
 }
@@ -417,12 +418,12 @@ for (const path of ["SKILL.md", "references/orchestration.md", "references/track
 }
 assert(orchestration.includes("Missing `reviewerAgent` blocks only reviewer dispatch"), "Missing reviewer must not inherit developer settings");
 assert(trackRuntime.includes("Never edit an active Executor's files concurrently"), "Local execution must preserve child ownership");
-assert(orchestration.includes("Keep the same Executor for a deliverable"), "Fixes should reuse developer context");
+assert(orchestration.includes("Keep the same Executor for a delivery batch"), "Fixes should reuse developer context");
 assert(read("README.md").includes("does not switch an already running Codex session"), "Main preference is not a live switch");
 
 for (const path of ["references/orchestration.md", "references/execution.md", "templates/executor-contract.md", "references/review.md", "references/validation-scenarios.md"]) {
   assert(read(path).includes("same-ID amend"), `${path} must support same-owner repair amendments`);
 }
 console.log(
-  `Validated dev-harness package: ${files.length} files, one registered Skill, automatic Architect routing, v1 compatibility, bounded finalization, explicit approvals, and Apache-2.0 attribution.`
+  `Validated dev-harness package: ${files.length} files, one registered Skill, automatic Architect routing, v1 compatibility, coherent delivery batches, explicit action-scoped approvals, and Apache-2.0 attribution.`
 );

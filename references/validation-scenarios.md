@@ -10,8 +10,8 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 - Architect modules are internal references, not separate `SKILL.md` files.
 - The user never chooses an internal module or implementation controller.
 - Initial implementation and first validation are attempt zero.
-- A corrective cycle is consumed only by a re-edit after required validation fails.
-- A review-fix cycle is reserved before an authorized fix and never reset by redispatch.
+- Repair counts record re-edits and review fixes as diagnostic evidence; after one Quick or two Scoped/Track cycles, reassess cause, evidence, and method.
+- Only an explicit current-user hard limit blocks continuation; it carries across Sessions, Work Orders, phases, and workers.
 - Auto Mode controls continuation, not commits or destructive actions.
 - Every dispatched child has an explicit model and reasoning depth; main Session inheritance is never implicit configuration.
 - Internal profiles never create user-facing configuration boundaries.
@@ -100,19 +100,19 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 
 **Request:** Change one local Retry button's visible text and accessible name. Behavior and cause are clear.
 
-**Expected:** Quick; no Architect artifacts. Focused test passes. Review catches any visible/accessibility mismatch. Maximum one corrective and one review-fix cycle.
+**Expected:** Quick; no Architect artifacts. Focused test passes. Review catches any visible/accessibility mismatch. One repair count is a diagnostic checkpoint, not an automatic stop.
 
 ## Scoped: CLI Dry Run
 
 **Request:** Add `--dry-run` across a parser and one service so external mutation is skipped and a summary is printed.
 
-**Expected:** Scoped when internal contracts remain unchanged. One bounded Work Order owns parser, service, and focused tests. Maximum two corrective and two review-fix cycles. A public API or persistence change escalates before implementation.
+**Expected:** Scoped when internal contracts remain unchanged. One coherent Work Order owns parser, service, focused tests and in-scope documentation when needed. Two repair counts are a diagnostic checkpoint, not an automatic stop. A public API or persistence change escalates before implementation.
 
 ## Track: Clear Durable Migration
 
 **Request:** Implement a staged persisted-schema migration with explicit target behavior, rollout, and rollback requirements.
 
-**Expected route:** Setup when core is absent, skip Discuss because direction is established, Propose with separate spec and plan approvals, then Implement after mode selection. Each plan unit is a bounded Work Order. No controller choice is shown.
+**Expected route:** Setup only for genuinely missing material context, skip Discuss because direction is established, Propose with a combined spec/plan/mode packet only when approval is needed, then Implement with Auto by default unless Manual is chosen or mandated. Adjacent compatible plan units may share one coherent Work Order. No controller choice is shown.
 
 ## Track: Ambiguous Data Ownership
 
@@ -136,7 +136,7 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 
 **Request:** Continue exact Track `20260831_delivery_state`; artifacts are valid and one unit is active.
 
-**Expected route:** Implement directly. Resume the active unit before pending work. Auto Mode may continue across accepted units; Manual Mode pauses at phase gates. Neither mode commits without explicit commit authorization.
+**Expected route:** Implement directly. Resume the active batch before pending work. Auto Mode is the default and continues across accepted batches; Manual Mode pauses at phase gates when chosen or mandated. Neither mode commits without explicit current-user or standing user/repository authorization.
 
 ## Status: Partial Management
 
@@ -166,9 +166,9 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 
 ## Budget Exhaustion
 
-**State:** A Track unit still fails required validation after two corrective cycles.
+**State:** A Track batch reaches the second repair checkpoint while required validation has meaningful new evidence.
 
-**Expected:** Unit and Track remain in progress or blocked with exact evidence. A new Session, phase, or Work Order does not reset the unit budget. Later plan units do not start.
+**Expected:** Reassess cause, evidence, and method, then continue the already-authorized batch when progress is concrete. A new Session, phase, or Work Order does not reset an explicit user hard limit. Repeated same-cause failure with unchanged evidence stops or replans; it is not retried through a new worker.
 
 ## Throughput: Quick Current Session
 
@@ -194,17 +194,17 @@ Use these maintenance scenarios to test routing, artifact contracts, approvals, 
 
 **Expected:** The Coordinator performs bookkeeping with zero bookkeeping children. It polls externally only to the recorded deadline and max polls, then returns `blocked` or `partial`; no child extends the wait.
 
-## Throughput: Hard Budget
+## Throughput: Explicit User Hard Limit
 
-**State:** A Scoped or Track unit has consumed `2/2` review-fix cycles.
+**State:** A user explicitly recorded a hard repair limit for a Scoped or Track batch, and the limit is reached.
 
-**Expected:** The next fix or dispatch is rejected. Only the current user may approve a named higher limit; a Session, child, Reviewer, Work Order, phase, or repeated check does not reset it.
+**Expected:** The dependent fix or dispatch is rejected with the exact evidence. The limit carries across Sessions, children, Reviewers, Work Orders and phases; legacy framework defaults do not create this stop.
 
-## Finalization Blocker
+## Final Review Blocker
 
-**State:** All implementation units pass, but final review finds a Blocking documentation or acceptance defect.
+**State:** All implementation batches pass, but final review finds a Blocking documentation or acceptance defect.
 
-**Expected:** Registry and metadata remain `in_progress`. Use the dedicated finalization unit's `0/2` review-fix budget. Mark the Track completed only after final review passes and durable state is validated.
+**Expected:** Registry and metadata remain `in_progress`. The existing developer or Coordinator-local owner applies the approved fix under the active repair ledger; Reviewer remains read-only. Mark the Track completed only after final review, requested-tier evidence, and durable state validation pass.
 
 ## Codex: Three Role Settings
 

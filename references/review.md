@@ -27,7 +27,7 @@ If the diff cannot be isolated from unrelated work, stop and ask the Coordinator
 
 For disputed technical choices or engineering feedback, use `references/technical-quality.md`; test concrete impact, preserve finding classes, and reuse established decisions.
 
-Before expanding review, name the unmet acceptance or introduced regression, evidence gap, and delivery decision. Finish when none remains. Phase/final review reconciles existing evidence; it does not restart an audit. Rerun only missing or invalidated checks.
+Before expanding review, name the unmet acceptance or introduced regression, evidence gap, and delivery decision. Finish when none remains. Review a coherent delivery batch or genuine phase/final boundary; a final review reconciles existing evidence and does not create an artificial finalization Work Order. Rerun only missing or invalidated checks.
 
 ## Finding Classes
 
@@ -48,26 +48,16 @@ Each Blocking or Relevant finding must include a concrete path, impact, evidence
 
 ## Fix Authorization
 
-Review is read-only by default. The Coordinator decides which findings to fix. Use `reviewerAgent` for independent review, never developer settings. Review a complete deliverable and reuse its reviewer for finding verification.
+Review is strictly read-only. The Coordinator decides which findings to fix. The existing Executor/developer or Coordinator-local owner applies them. Use `reviewerAgent` for independent review, never developer settings. Review a complete delivery batch and reuse its reviewer for finding verification.
 
 - Approve Blocking findings by default when the correction stays inside the original Work Order.
 - Ask the user or Coordinator before applying Relevant findings that alter behavior, scope, architecture, or cost.
 - Never fix Scope-change, Pre-existing, Theoretical, or Out-of-scope findings in the current loop.
-- Reserve the parent review-fix cycle when the Coordinator authorizes the fix, before dispatch. Failed or cancelled dispatch does not refund it.
-- Keep a one-line or mechanical correction in the same authorized local or delegated fix cycle. Do not create a new parent Work Order, Track, or Reviewer Session. Send a same-ID amended Work Order with a fresh embedded envelope to the existing Executor; preserve ownership, validation and consumed budgets.
-- Give each fix Work Order one corrective cycle. Creating a new Session or Work Order does not reset the total review-fix count.
+- Record the approved finding and changed evidence in the existing repair ledger; a diagnostic checkpoint is not a hard reservation. Keep a one-line or mechanical correction in the same authorized local or delegated repair. Do not create a new parent Work Order, Track, or Reviewer Session. Send a same-ID amended Work Order with a fresh embedded envelope to the existing Executor; preserve ownership, validation and repair counts.
+- Creating a new Session or Work Order does not reset an explicit current-user hard limit. Repeated same-cause failure with unchanged evidence requires a replan, not a blind retry through another worker.
 - After a fix, rerun only the focused check that proves the finding and the smallest adjacent check triggered by its changed scope. Reuse matching validation-ledger evidence; do not rerun a broad bundle by habit.
 
-The total loop budget includes all review-triggered fixes:
-
-- Quick: one review-fix cycle.
-- Scoped: two review-fix cycles.
-- Track unit: two review-fix cycles.
-- Track finalization unit: two review-fix cycles.
-
-When the budget is exhausted, return unresolved evidence and a recommendation. Do not lower finding severity to claim success and do not continue autonomously.
-
-Only the current user may approve a larger limit for one named finding or risk. Record the approval and new limit; the Coordinator cannot turn `2/2` into `3/3` or `4/4` on its own.
+Review-fix counts are soft diagnostic checkpoints. After one Quick or two Scoped/Track repair cycles, reassess cause, evidence, and method. Continue already-authorized work when meaningful progress or new evidence exists; a third meaningful in-scope repair does not require user approval merely because the checkpoint was reached. Only an explicit current-user hard limit blocks continuation, and it carries across Sessions, Work Orders, phases, and workers. Existing recorded user hard limits remain in force.
 
 ## Acceptance Decision
 
@@ -75,7 +65,7 @@ Return one decision:
 
 - `accepted`: Acceptance and required validation pass, scope is clean, and no Blocking finding remains.
 - `changes-required`: One or more Blocking findings remain and budget is available.
-- `blocked`: A decision, capability, isolation problem, or exhausted budget prevents safe continuation.
+- `blocked`: A decision, capability, isolation problem, repeated same-cause failure without a safe replan, or exhausted explicit user hard limit prevents safe continuation.
 - `partial`: Useful authorized work exists, but acceptance is incomplete and the Coordinator chooses to preserve it.
 
 When no Blocking finding exists, say so explicitly and finish. Do not invent improvements to make the review appear substantive.
