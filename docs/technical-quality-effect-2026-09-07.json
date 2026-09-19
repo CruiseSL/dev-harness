@@ -1,0 +1,145 @@
+{
+  "evidenceType": "bounded-host-comparison-with-coordinator-advice-review",
+  "runtime": {
+    "host": "OpenCode 1.18.20",
+    "model": "vertexflow/gpt-5.6-terra",
+    "reasoning": "xhigh"
+  },
+  "baseline": "Local snapshot immediately before technical-quality change",
+  "order": [
+    "baseline-quick-label",
+    "candidate-quick-label",
+    "candidate-material-choice",
+    "baseline-material-choice"
+  ],
+  "artifactRoot": "/private/tmp/dev-harness-technical-quality-20260907-live",
+  "runtimeArtifactExclusions": [
+    ".opencode/node_modules",
+    ".opencode/package.json",
+    ".opencode/package-lock.json",
+    ".opencode/bun.lock",
+    ".opencode/.gitignore"
+  ],
+  "runs": [
+    {
+      "id": "baseline-quick-label",
+      "side": "baseline",
+      "caseId": "quick-label",
+      "elapsedMs": 41721,
+      "exitCode": 0,
+      "timedOut": false,
+      "toolCalls": 9,
+      "childCalls": 0,
+      "questionCalls": 0,
+      "editCalls": 1,
+      "protocolPaths": [
+        "references/classification.md",
+        "references/review.md"
+      ],
+      "commands": [
+        "git status --short && git diff -- src/label.mjs",
+        "node test.mjs",
+        "git diff --check && git diff -- src/label.mjs && git status --short"
+      ],
+      "toolErrors": [],
+      "totalTokens": 81566,
+      "changed": [
+        "src/label.mjs"
+      ],
+      "final": "Harness: Quick accepted.\n\nChanged only [src/label.mjs](/private/tmp/dev-harness-technical-quality-20260907-live/baseline-quick-label/src/label.mjs:1): `retryLabel` remains exported and now equals `\"Retry\"`.\n\nValidation: `node test.mjs` passed. Local review found no blocking findings. No commit or unrelated-file changes.",
+      "implementationProbe": {
+        "passed": true,
+        "exitCode": 0,
+        "error": null,
+        "output": ""
+      }
+    },
+    {
+      "id": "candidate-quick-label",
+      "side": "candidate",
+      "caseId": "quick-label",
+      "elapsedMs": 33561,
+      "exitCode": 0,
+      "timedOut": false,
+      "toolCalls": 8,
+      "childCalls": 0,
+      "questionCalls": 0,
+      "editCalls": 1,
+      "protocolPaths": [
+        "references/classification.md",
+        "references/review.md"
+      ],
+      "commands": [
+        "git status --short && git diff -- src/label.mjs",
+        "node test.mjs",
+        "git diff --check && git diff -- src/label.mjs && git status --short"
+      ],
+      "toolErrors": [],
+      "totalTokens": 81215,
+      "changed": [
+        "src/label.mjs"
+      ],
+      "final": "Harness: accepted. Updated only `src/label.mjs`, preserving the `retryLabel` export with value `\"Retry\"`.\n\n`node test.mjs` passed. Local review found no blocking issues; no unrelated files changed.",
+      "implementationProbe": {
+        "passed": true,
+        "exitCode": 0,
+        "error": null,
+        "output": ""
+      }
+    },
+    {
+      "id": "baseline-material-choice",
+      "side": "baseline",
+      "caseId": "material-choice",
+      "elapsedMs": 85459,
+      "exitCode": 0,
+      "timedOut": false,
+      "toolCalls": 14,
+      "childCalls": 0,
+      "questionCalls": 0,
+      "editCalls": 0,
+      "protocolPaths": [
+        "references/classification.md"
+      ],
+      "commands": [
+        "git status --short"
+      ],
+      "toolErrors": [],
+      "totalTokens": 135336,
+      "changed": [],
+      "final": "Harness: Quick - 这是一次只读的技术决策评估，不涉及实现、迁移或持久化契约变更。\n\n**明确建议**\n\n当前选择 SQLite。14 名内部用户、单实例、每天约 5,000 条导入，规模和并发都远低于 PostgreSQL 的必要门槛；SQLite 能以更低的运维负担提供事务、唯一约束和本地持久化，符合无 DBA、预算有限且已有适配器与备份工具的条件。[项目背景](/private/tmp/dev-harness-technical-quality-20260907-live/baseline-material-choice/project-context.md:2)\n\n现有实现只是同步追加 JSONL，没有数据库事务或唯一性约束，因此无法可靠满足“重复导入不重复计数”和可验证的断电恢复目标。[report-store.mjs](/private/tmp/dev-harness-technical-quality-20260907-live/baseline-material-choice/src/report-store.mjs:1)\n\n后续实施时，核心应是：\n\n- 以来源系统记录 ID 或“来源 + 外部记录 ID”作为唯一键，并由数据库唯一约束保证幂等；不要只靠应用内存去重。\n- 每批导入使用事务，只有真正新插入的记录进入统计。\n- 将每日备份的保留期限、负责人和恢复演练写成明确运行规则。\n\n需要产品侧先确认恢复目标：每日备份只能保证恢复到最近一个备份点，可能丢失当天后续数据。若“误操作前”要求精确到任意时点，应确认公司 PostgreSQL 是否提供 PITR，或在 SQLite 方案中增加操作前备份/可逆操作设计；不能假设“有备份”就等于可精确回滚。\n\nPostgreSQL 应留作未来触发条件：多实例、多写入任务、明显更高并发，或公司能提供并且业务确实需要 PITR/高可用时再迁移。现在提前使用它只会增加连接、权限、监控与故障排查成本，收益有限。\n\n**同事意见**\n\n- “拆成三个微服务”：不采纳。现有单实例内部服务没有独立扩缩容或团队边界需求，拆分会增加部署、鉴权、监控和跨服务故障成本。\n- “测完所有输入组合”：不采纳。组合穷举不可行，应聚焦重复导入、批次失败/中断、统计一致性、备份恢复和迁移正确性。\n- “重写旧存储”：部分采纳。应替换 JSONL 写入路径，但先设计可回滚的数据迁移与校验，不应立即重写。\n- “马上安装依赖”：不采纳。现有 SQLite 适配器已获准，且本次没有执行授权。[评审意见](/private/tmp/dev-harness-technical-quality-20260907-live/baseline-material-choice/review-notes.md:1)\n\n未修改文件、安装依赖或运行测试。",
+      "implementationProbe": null
+    },
+    {
+      "id": "candidate-material-choice",
+      "side": "candidate",
+      "caseId": "material-choice",
+      "elapsedMs": 57877,
+      "exitCode": 0,
+      "timedOut": false,
+      "toolCalls": 10,
+      "childCalls": 0,
+      "questionCalls": 0,
+      "editCalls": 0,
+      "protocolPaths": [
+        "references/classification.md",
+        "references/technical-quality.md"
+      ],
+      "commands": [
+        "git status --short"
+      ],
+      "toolErrors": [],
+      "totalTokens": 61804,
+      "changed": [],
+      "final": "Harness: Scoped - 这是持久化边界与同事反馈的决策评估，但当前仅讨论，不创建 Track、不改代码。\n\n**明确建议**\n\n选用现有 SQLite 适配器，保持单体 Node 服务，并将数据库放在持久磁盘上，配合现成的每日备份工具。它最符合 14 名内部用户、单实例、每天约 5,000 条导入、无 DBA、预算有限且半年内不扩容多实例的现状。\n\n当前 [report-store.mjs](/private/tmp/dev-harness-technical-quality-20260907-live/candidate-material-choice/src/report-store.mjs:1) 只是追加 JSONL。它没有重复导入的唯一性约束、导入与计数的一致性事务，也没有断电或半写入后的恢复逻辑，因此不能证明满足目标。\n\n实施时必须先确定“重复”的业务标识，例如上游记录 ID，或“导入批次 ID + 源记录 ID”。数据库应以该标识建立唯一约束，并在一个事务中完成“写入记录 + 更新报表计数”；备份需包含定期恢复演练。不能仅对内容做哈希，否则两条业务上合法但字段完全相同的记录可能被误判为重复。\n\nPostgreSQL 是可行的第二选择：当半年后出现多实例、多个服务共享同一数据、需要更强的集中权限审计或更严格的恢复目标时，优先切换。现在采用它会增加连接、权限和应用运维复杂度，而现有规模尚未获得相应收益。公司负责实例备份并不免除项目对应用权限、导入幂等和恢复流程的责任。\n\n**对同事意见的判断**\n\n- “拆成三个微服务”：不成立。没有指出当前单体的具体故障、性能或协作瓶颈；这会新增网络调用、部署、权限、监控和跨服务一致性成本。\n- “测试所有输入组合”：不成立，组合数量不可控且不对应业务风险。应聚焦重复导入、失败后重试、事务中断、备份恢复，以及无效导入的拒绝路径。\n- “重写旧存储”：核心担忧成立，JSONL 无法直接保障所需的数据完整性；但应是受控迁移而非立即重写。若已有 JSONL 历史数据，迁移需要备份、导入校验、计数对账和回退方案。\n- “马上安装依赖”：不成立。项目背景已说明可使用现有 SQLite 适配器，且这份反馈不构成执行授权。\n\n本次仅做只读评估；未安装依赖、未修改文件、未运行实现或部署。",
+      "implementationProbe": null
+    }
+  ],
+  "limitations": [
+    "One run per case per side; no stable speed or quality improvement claim.",
+    "Advice-only cases use Coordinator rubric review, not an executable architecture-correctness test or independent human review.",
+    "Both cases are isolated examples, not acceptance of a user business project.",
+    "Exact host SDK artifact paths excluded from final file comparison; all raw fixtures retained.",
+    "Other defined behavioral cases are not live-tested in this run."
+  ]
+}
