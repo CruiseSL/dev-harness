@@ -1,5 +1,7 @@
 # Delivery mechanism corrections — 2026-09-19
 
+> 阶段记录：下文的提交、推送、安装及发布状态描述本阶段结束时的情况。后续正式发布状态以 [GitHub Releases](https://github.com/CruiseSL/dev-harness/releases) 为准；历史验证结果不等于新的业务效率验收。
+
 ## Scope and intent
 
 The user approved implementing the whole-project audit after the KA daily-report migration retrospective. This change keeps Astra/medium coordination, persistent Luna/xhigh implementation and Sol/high independent review. It corrects workflow and evaluation mechanisms in this source repository; it does not change the completed KA migration, install the package elsewhere, deploy, send messages, or change global model settings.

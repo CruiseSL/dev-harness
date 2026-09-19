@@ -1,5 +1,7 @@
 # Role-based dispatch and delivery ownership — 2026-09-19
 
+> 阶段记录：下文的提交、推送、安装及发布状态描述本阶段结束时的情况。后续正式发布状态以 [GitHub Releases](https://github.com/CruiseSL/dev-harness/releases) 为准；历史验证结果不等于新的业务效率验收。
+
 ## Accepted scope
 
 Current user selected coordinator gpt-6-astra/medium, developer gpt-5.6-luna/xhigh and independent reviewer gpt-5.6-sol/high. Apply these in this dev-harness project; keep completed KA production untouched. The main runtime's most recent turn_context (2026-09-18T17:59:08.015Z) already reports Astra/medium. A project preference does not switch a running session.

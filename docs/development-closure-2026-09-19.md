@@ -1,5 +1,7 @@
 # 开发收口 — 2026-09-19
 
+> 阶段记录：下文的提交、推送、安装及发布状态描述本阶段结束时的情况。后续正式发布状态以 [GitHub Releases](https://github.com/CruiseSL/dev-harness/releases) 为准；历史验证结果不等于新的业务效率验收。
+
 本次只整理 dev-harness 开发遗留，不扩大到业务需求或新增评测项目。
 
 ## 已确认的交付状态
