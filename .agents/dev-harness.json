@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "coordinator": {
+    "model": "gpt-6-astra",
+    "reasoning": "medium"
+  },
+  "childAgent": {
+    "model": "gpt-5.6-luna",
+    "reasoning": "xhigh"
+  },
+  "reviewerAgent": {
+    "model": "gpt-5.6-sol",
+    "reasoning": "high"
+  }
+}

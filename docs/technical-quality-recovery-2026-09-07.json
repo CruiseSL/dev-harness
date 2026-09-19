@@ -1,0 +1,65 @@
+{
+  "evidenceType": "bounded-host-comparison-with-coordinator-advice-review",
+  "runtime": {
+    "host": "OpenCode 1.18.20",
+    "model": "vertexflow/gpt-5.6-terra",
+    "reasoning": "xhigh"
+  },
+  "baseline": "Targeted correction only; initial comparison retained separately",
+  "order": [
+    "candidate-material-choice"
+  ],
+  "artifactRoot": "/private/tmp/dev-harness-technical-quality-20260907-recovery",
+  "runtimeArtifactExclusions": [
+    ".opencode/node_modules",
+    ".opencode/package.json",
+    ".opencode/package-lock.json",
+    ".opencode/bun.lock",
+    ".opencode/.gitignore"
+  ],
+  "runs": [
+    {
+      "id": "candidate-material-choice",
+      "side": "candidate",
+      "caseId": "material-choice",
+      "elapsedMs": 92200,
+      "exitCode": 0,
+      "timedOut": false,
+      "toolCalls": 15,
+      "childCalls": 0,
+      "questionCalls": 0,
+      "editCalls": 0,
+      "protocolPaths": [
+        "references/technical-quality.md",
+        "references/classification.md",
+        "references/review.md"
+      ],
+      "commands": [
+        "git status --short && rg --files -g '!node_modules' -g '!vendor'",
+        "git log --oneline -10 && git status --short && git diff --stat && git diff -- src/report-store.mjs project-context.md review-notes.md",
+        "git show --format=fuller --stat HEAD && git show --format= -- src/report-store.mjs"
+      ],
+      "toolErrors": [
+        {
+          "tool": "bash",
+          "input": {
+            "command": "git show --format=fuller --stat HEAD && git show --format= -- src/report-store.mjs",
+            "workdir": "/private/tmp/dev-harness-technical-quality-20260907-recovery/candidate-material-choice"
+          },
+          "error": "The user has specified a rule which prevents you from using this specific tool call. Here are some of the relevant rules [{\"permission\":\"*\",\"action\":\"allow\",\"pattern\":\"*\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"ls*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git status*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git diff*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git rev-parse*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git ls-files*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git log*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"node test.mjs\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"node --check src/*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"cat *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"rg *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"find *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"wc *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"date*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"shasum *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"sha256sum *\",\"action\":\"allow\"},{\"permission\":\"*\",\"action\":\"deny\",\"pattern\":\"*\"},{\"permission\":\"bash\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"bash\",\"pattern\":\"pwd\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"ls*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git status*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git diff*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git rev-parse*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git ls-files*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"git log*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"node test.mjs\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"node --check src/*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"cat *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"rg *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"find *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"wc *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"date*\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"shasum *\",\"action\":\"allow\"},{\"permission\":\"bash\",\"pattern\":\"sha256sum *\",\"action\":\"allow\"}]"
+        }
+      ],
+      "totalTokens": 102967,
+      "changed": [],
+      "final": "Harness: Scoped - 这是持久化方案与评审意见的只读决策，不授权任何实现。\n\n**明确建议**\n\n选择 **SQLite**，替换当前 JSONL 追加存储。它匹配单实例、14 名用户、每天约 5,000 条记录、无专职 DBA 和有限维护精力；公司已有适配器、数据仍在公司环境内，且成本已满足预算。\n\n现有实现只有 `appendFileSync(JSON.stringify(...))`，没有唯一约束、事务、版本记录或恢复能力，[report-store.mjs](/private/tmp/dev-harness-technical-quality-20260907-recovery/candidate-material-choice/src/report-store.mjs:1) 无法证明满足“不重复计数”和“误操作恢复”。\n\n后续实施应把以下作为验收条件：\n\n- 以业务上稳定的“来源记录 ID / 导入批次 ID”建立唯一约束，并在一个事务中写入；重试导入不会重复计数。\n- 对删除、覆盖等误操作保留历史版本或逻辑删除和操作审计，支持定向恢复。\n- 每日备份只代表最多可能丢失一天的数据，不能自动满足“恢复到误操作前”。需要确认可接受的数据丢失时长；若要求精确恢复，则版本历史是必需的，并应演练 SQLite 一致性备份与恢复。\n\n唯一需要产品明确的业务规则是：“重复”如何定义。相同内容的两笔业务未必是重复；应优先使用上游系统的稳定记录 ID，而不是仅凭 JSON 内容哈希判断。\n\n**为何暂不选 PostgreSQL**\n\nPostgreSQL 在多实例、多写入并发、集中权限和已确认的时间点恢复需求下更合适。但当前六个月内没有多实例计划，采用它会增加网络连接、应用凭据、权限和故障排查责任。公司负责实例备份不等于已承诺时间点恢复或业务级撤销。只有当上述扩展计划落地，或公司能提供并承诺满足恢复目标的 PostgreSQL 恢复能力时，再切换该建议。\n\n**同事意见**\n\n- “不够专业”：`Theoretical`。没有指出具体路径、故障场景或证据。\n- “拆成三个微服务”：`Theoretical`；若未来出现独立扩缩容、团队边界或多实例需求，才是 `Scope-change`。当前会增加三个部署和运维面，不解决已知的数据完整性问题。\n- “测完所有输入组合”：`Theoretical`。应改为针对性验证：重复导入、事务失败/重试、唯一约束、备份恢复和误操作撤销。\n- “重写旧存储”：JSONL 的能力缺口是 `Pre-existing`，迁移到数据库是合理的后续范围变更；“马上安装依赖”则不构成授权，且违反本次只读边界。\n\n未修改文件、未安装依赖、未运行测试或发布操作。",
+      "implementationProbe": null
+    }
+  ],
+  "limitations": [
+    "One run per case per side; no stable speed or quality improvement claim.",
+    "Advice-only cases use Coordinator rubric review, not an executable architecture-correctness test or independent human review.",
+    "Both cases are isolated examples, not acceptance of a user business project.",
+    "Exact host SDK artifact paths excluded from final file comparison; all raw fixtures retained.",
+    "Other defined behavioral cases are not live-tested in this run."
+  ]
+}

@@ -1,0 +1,30 @@
+# 开发收口 — 2026-09-19
+
+> 阶段记录：下文的提交、推送、安装及发布状态描述本阶段结束时的情况。后续正式发布状态以 [GitHub Releases](https://github.com/CruiseSL/dev-harness/releases) 为准；历史验证结果不等于新的业务效率验收。
+
+本次只整理 dev-harness 开发遗留，不扩大到业务需求或新增评测项目。
+
+## 已确认的交付状态
+
+- 源码实现提交：`12d2fef`（角色配置）和 `48d2b65`（交付机制及评测可靠性）；已推送 `origin/feat/progressive-disclosure-evals`。
+- 已有验证：81/81 回归测试、静态核心 21/21 和 Sol 独立审查通过。这些结果来自实现阶段；本次文档收口不重复运行完整模型或回归评测。
+- KA Pages 安装更新提交：`ac677bf`，43 个文件已与源码逐一核对；角色偏好为 Astra/medium、Luna/xhigh、Sol/high。安装保持禁用，未修改业务运行状态。该业务仓库提交目前仅在本地。
+
+## 本次处理的遗留
+
+1. 将 10 份此前未跟踪的历史方案、维护说明和评测数据纳入版本记录。六份 Markdown 增加历史标记；四份 JSON 保持原始字节，不改写不理想的旧实验结果。
+2. 将 `.opencode/agents/dev-harness-worker.md` 原样归档到 `history/dev-harness-worker-opencode-20260907.md.txt`，移出宿主可自动加载的位置。它仍固定指向旧公司 provider 的 Terra，且执行正文早于当前修复协议；归档文本仅用于追溯，不作为可执行配置。
+3. 明确区分开发完成、分支推送、默认安装版本及真实效果验收，避免历史报告的“尚未提交”被误读为当前代码遗留。
+
+## 尚未完成但不属于代码收尾缺陷的事项
+
+- **发布到默认分支**：尚未合并 main、发布 tag。README 的默认安装命令仍会获取默认分支版本；本次已更新的 KA Pages 使用明确提交的本地安装包。合并与发布需要单独授权，不能把分支推送描述为默认版本发布。
+- **真实交付效率验收**：下一次实际业务需求仍需记录总耗时、人工介入、角色配置和 token；现有结果不支持稳定提速百分比。历史 OpenCode 样本对自动生成依赖文件使用了独立验收路径，其局限保留在原报告中，不冒充当前原始 CLI 端到端通过。
+- **KA Pages 仓库收口**：该仓库分支已有其他任务提交；不随本次推送它们。`docs/handoffs/bitunix-id-20260919/README.md` 属于业务交接，`skills-lock.json` 是此前移除 Skills CLI 条目的改动，均保持不变，应在所属任务中单独整理。当前 dev-harness 采用手动安装，不伪造 CLI hash。
+
+## 验证与追溯
+
+- 本次基线：`48d2b6527b91656144fba84f8f1da9967d4e1062`，已跟踪文件无差异，另有 11 个未跟踪文件。
+- 原始文件 SHA-256 清单保存在本次本地验收目录 `/private/tmp/dev-harness-closure-20260919/baseline.json`；历史 JSON 和旧 worker 的原始内容保留。
+- 本次验证通过：`node tests/validate.mjs`；四份历史 JSON 解析与原始 SHA-256 核对；旧 worker 归档 SHA-256 核对；`git diff --check`。
+- 没有新增运行时逻辑、依赖、子代理、模型调用或生产操作。

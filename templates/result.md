@@ -6,7 +6,7 @@
 
 ## Summary
 
-<What changed and the observable result, in two or three sentences.>
+<What changed and the observable result for the complete coherent delivery batch, in two or three sentences.>
 
 ## Changed Files
 
@@ -17,15 +17,29 @@
 - [x] <criterion>: <evidence>
 - [ ] <unmet criterion>: <reason>
 
+- **Requested completion tier:** `<code|deployed|live|business|local-only>`
+- **Target environment:** `<environment or not applicable>`
+- **Minimum normal-path evidence:** `<evidence or missing gap>`
+
 ## Validation
 
-| Check                     | Result                         | Evidence                   |
-| ------------------------- | ------------------------------ | -------------------------- |
-| `<command or inspection>` | `<passed, failed, or not run>` | <concise output or reason> |
+| Check | Scope/input fingerprint | Relevant-file fingerprint | Result | Time | Source | Evidence |
+| ----- | ----------------------- | ------------------------- | ------ | ---- | ------ | -------- |
+| `<command or inspection>` | `<hash>` | `<hash>` | `<passed, failed, blocked, or not run>` | `<UTC>` | `<executed|reused>` | <concise output or reason> |
 
-- **Corrective cycles used:** `<number>/<budget>`
-- **Parent review-fix cycle:** `<reserved/limit from the Work Order>`
+- **Repair counts:** `<corrective/review-fix counts; diagnostic checkpoint status>`
+- **Explicit user hard limit:** `<none or exact limit and authority>`
 - **Broader validation:** `<not triggered|trigger and result>`
+- **Validation executions:** `<count>`
+- **Validation reuses:** `<count>`
+- **Broad checks:** `<count>`
+- **External polls:** `<Coordinator-owned count; Executor must return 0>`
+- **Request elapsed / first implementation complete:** `<observed times, or unavailable; keep the original request start>`
+- **Remaining acceptance / next check decision:** `<unmet criterion and missing evidence, or none: ready for review>`
+
+## Git Closure
+
+`<staged/commit evidence, or exact preserved dirty files, reason they remain, and next owner>`
 
 ## Discoveries
 

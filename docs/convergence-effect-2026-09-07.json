@@ -1,0 +1,405 @@
+{
+  "date": "2026-09-07",
+  "baseline": "Immediately before the lean entry change, not public v2.5",
+  "baselineHead": "9d88df9814e303046d7ff05e9cf42b31af2e10bb",
+  "baselineDiffCommand": "git diff --binary HEAD -- .",
+  "baselineDiffSha256": "bcc5a59a9c78d6d6f7e4ed18c4a69cc9d7b2e534cad47e55cb1401d98ee9a487",
+  "artifactRoot": "/private/tmp/dev-harness-convergence-20260907-live-b",
+  "order": [
+    "baseline-bounded-pagination",
+    "candidate-bounded-pagination",
+    "candidate-review-closure",
+    "baseline-review-closure"
+  ],
+  "runtime": {
+    "host": "OpenCode 1.18.20",
+    "model": "vertexflow/gpt-5.6-terra",
+    "reasoning": "xhigh"
+  },
+  "skillBytes": {
+    "before": 8139,
+    "after": 7754
+  },
+  "tests": {
+    "packageValidation": "passed",
+    "localTests": 60,
+    "failed": 0
+  },
+  "runs": [
+    {
+      "summary": {
+        "id": "baseline-bounded-pagination",
+        "elapsedMs": 38317,
+        "terminal": "accepted",
+        "final": "Implemented `page` using `items.slice(offset, offset + limit)` in [src/page.mjs](/private/tmp/dev-harness-convergence-20260907-live-b/baseline-bounded-pagination/src/page.mjs:1). It preserves the export and does not mutate `items`.\n\nValidation passed: `node test.mjs`.\n\nLocal review: accepted, with no blocking findings.",
+        "toolCalls": 9,
+        "focusedTests": 1,
+        "validationChecks": 2,
+        "edits": 1,
+        "protocolReads": 3,
+        "commands": [
+          {
+            "command": "git status --short && git diff -- src/page.mjs",
+            "status": "completed",
+            "exit": 0
+          },
+          {
+            "command": "node test.mjs",
+            "status": "completed",
+            "exit": 0
+          },
+          {
+            "command": "git diff --check && git diff -- src/page.mjs && git status --short",
+            "status": "completed",
+            "exit": 0
+          }
+        ],
+        "toolErrors": [],
+        "childEvidenceIncluded": false,
+        "workerSkillLoads": 0,
+        "totalTokens": 82567
+      },
+      "result": {
+        "schemaVersion": 1,
+        "evidenceType": "observed-delivery",
+        "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+        "id": "baseline-bounded-pagination",
+        "side": "baseline",
+        "caseId": "bounded-pagination",
+        "startedAt": "2026-09-07T08:41:40.277Z",
+        "finishedAt": "2026-09-07T08:42:18.594Z",
+        "elapsedMs": 38317,
+        "firstImplementationMs": 25294,
+        "postImplementationMs": 13023,
+        "metrics": {
+          "terminalState": "accepted",
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "firstImplementationAt": "2026-09-07T08:42:05.571Z",
+          "childDispatchCount": 0,
+          "reviewerDispatchCount": 0,
+          "validationExecutionCount": 2,
+          "validationReuseCount": null,
+          "broadCheckCount": 0,
+          "reviewFixCount": null,
+          "externalPollCount": 0
+        },
+        "runtime": {
+          "host": "OpenCode 1.18.20",
+          "model": "vertexflow/gpt-5.6-terra",
+          "reasoning": "xhigh"
+        },
+        "terminalState": "accepted",
+        "completed": true,
+        "changed": [
+          "src/page.mjs"
+        ],
+        "outOfScope": [],
+        "acceptance": {
+          "passed": true,
+          "exitCode": 0,
+          "error": null,
+          "output": ""
+        },
+        "runtimeArtifactExclusions": [
+          ".opencode/node_modules",
+          ".opencode/package.json",
+          ".opencode/package-lock.json",
+          ".opencode/.gitignore"
+        ],
+        "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+      },
+      "observed": {
+        "todoCalls": 0,
+        "childCalls": 0,
+        "protocolPaths": [
+          "references/classification.md",
+          "references/review.md"
+        ],
+        "evidenceReused": false
+      }
+    },
+    {
+      "summary": {
+        "id": "baseline-review-closure",
+        "elapsedMs": 71552,
+        "terminal": "accepted",
+        "final": "Accepted. No blocking findings.\n\n[src/page.mjs](/private/tmp/dev-harness-convergence-20260907-live-b/baseline-review-closure/src/page.mjs:1) meets the stated contract without mutation. The prior `node test.mjs` pass was reused: current source and test SHA-256 hashes match `validation-evidence.json`.\n\nThe suggested invalid-input rejection is a later contract decision; exhaustive boundaries and a full audit are not required by this scope. No files changed.",
+        "toolCalls": 12,
+        "focusedTests": 0,
+        "validationChecks": 0,
+        "edits": 0,
+        "protocolReads": 4,
+        "commands": [
+          {
+            "command": "git status --short && git diff -- src/page.mjs && git log --oneline -10",
+            "status": "completed",
+            "exit": 0
+          },
+          {
+            "command": "shasum -a 256 src/page.mjs test.mjs",
+            "status": "completed",
+            "exit": 0
+          }
+        ],
+        "toolErrors": [],
+        "childEvidenceIncluded": false,
+        "workerSkillLoads": 0,
+        "totalTokens": 113185
+      },
+      "result": {
+        "schemaVersion": 1,
+        "evidenceType": "observed-delivery",
+        "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+        "id": "baseline-review-closure",
+        "side": "baseline",
+        "caseId": "review-closure",
+        "startedAt": "2026-09-07T08:45:16.242Z",
+        "finishedAt": "2026-09-07T08:46:27.794Z",
+        "elapsedMs": 71552,
+        "firstImplementationMs": null,
+        "postImplementationMs": null,
+        "metrics": {
+          "terminalState": "accepted",
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "firstImplementationAt": null,
+          "childDispatchCount": 0,
+          "reviewerDispatchCount": 0,
+          "validationExecutionCount": 0,
+          "validationReuseCount": null,
+          "broadCheckCount": 0,
+          "reviewFixCount": null,
+          "externalPollCount": 0
+        },
+        "runtime": {
+          "host": "OpenCode 1.18.20",
+          "model": "vertexflow/gpt-5.6-terra",
+          "reasoning": "xhigh"
+        },
+        "terminalState": "accepted",
+        "completed": true,
+        "changed": [],
+        "outOfScope": [],
+        "acceptance": {
+          "passed": true,
+          "exitCode": 0,
+          "error": null,
+          "output": ""
+        },
+        "runtimeArtifactExclusions": [
+          ".opencode/node_modules",
+          ".opencode/package.json",
+          ".opencode/package-lock.json",
+          ".opencode/.gitignore"
+        ],
+        "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+      },
+      "observed": {
+        "todoCalls": 3,
+        "childCalls": 0,
+        "protocolPaths": [
+          "references/delivery.md",
+          "references/review.md",
+          "references/architect/router.md"
+        ],
+        "evidenceReused": true
+      }
+    },
+    {
+      "summary": {
+        "id": "candidate-bounded-pagination",
+        "elapsedMs": 50153,
+        "terminal": "accepted",
+        "final": "Implemented `page(items, offset, limit)` in [src/page.mjs](/private/tmp/dev-harness-convergence-20260907-live-b/candidate-bounded-pagination/src/page.mjs:1) with non-mutating `slice` semantics; the export is preserved.\n\nValidation passed: `node test.mjs`.\n\nLocal review found no blocking issues. Harness terminal state: `accepted`.",
+        "toolCalls": 12,
+        "focusedTests": 1,
+        "validationChecks": 2,
+        "edits": 1,
+        "protocolReads": 3,
+        "commands": [
+          {
+            "command": "git status --short",
+            "status": "completed",
+            "exit": 0
+          },
+          {
+            "command": "node test.mjs",
+            "status": "completed",
+            "exit": 0
+          },
+          {
+            "command": "git diff --check && git diff -- src/page.mjs && git status --short",
+            "status": "completed",
+            "exit": 0
+          }
+        ],
+        "toolErrors": [],
+        "childEvidenceIncluded": false,
+        "workerSkillLoads": 0,
+        "totalTokens": 129941
+      },
+      "result": {
+        "schemaVersion": 1,
+        "evidenceType": "observed-delivery",
+        "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+        "id": "candidate-bounded-pagination",
+        "side": "candidate",
+        "caseId": "bounded-pagination",
+        "startedAt": "2026-09-07T08:42:44.482Z",
+        "finishedAt": "2026-09-07T08:43:34.635Z",
+        "elapsedMs": 50153,
+        "firstImplementationMs": 28104,
+        "postImplementationMs": 22049,
+        "metrics": {
+          "terminalState": "accepted",
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "firstImplementationAt": "2026-09-07T08:43:12.586Z",
+          "childDispatchCount": 0,
+          "reviewerDispatchCount": 0,
+          "validationExecutionCount": 2,
+          "validationReuseCount": null,
+          "broadCheckCount": 0,
+          "reviewFixCount": null,
+          "externalPollCount": 0
+        },
+        "runtime": {
+          "host": "OpenCode 1.18.20",
+          "model": "vertexflow/gpt-5.6-terra",
+          "reasoning": "xhigh"
+        },
+        "terminalState": "accepted",
+        "completed": true,
+        "changed": [
+          "src/page.mjs"
+        ],
+        "outOfScope": [],
+        "acceptance": {
+          "passed": true,
+          "exitCode": 0,
+          "error": null,
+          "output": ""
+        },
+        "runtimeArtifactExclusions": [
+          ".opencode/node_modules",
+          ".opencode/package.json",
+          ".opencode/package-lock.json",
+          ".opencode/.gitignore"
+        ],
+        "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+      },
+      "observed": {
+        "todoCalls": 3,
+        "childCalls": 0,
+        "protocolPaths": [
+          "references/classification.md",
+          "references/review.md"
+        ],
+        "evidenceReused": false
+      }
+    },
+    {
+      "summary": {
+        "id": "candidate-review-closure",
+        "elapsedMs": 65426,
+        "terminal": "accepted",
+        "final": "Accepted. [src/page.mjs](/private/tmp/dev-harness-convergence-20260907-live-b/candidate-review-closure/src/page.mjs:1) uses non-mutating `slice`, satisfying all supported pagination cases.\n\nValidation reused: recorded `node test.mjs` passed, and both recorded input hashes match current `src/page.mjs` and `test.mjs`. No other checks were required.\n\nNo blocking findings. The suggestions to reject unsupported inputs, exhaustively expand tests, and rerun a full audit exceed the original acceptance and were not adopted. No files changed.",
+        "toolCalls": 11,
+        "focusedTests": 0,
+        "validationChecks": 0,
+        "edits": 0,
+        "protocolReads": 4,
+        "commands": [
+          {
+            "command": "git status --short && git diff -- src/page.mjs && shasum -a 256 src/page.mjs test.mjs",
+            "status": "completed",
+            "exit": 0
+          }
+        ],
+        "toolErrors": [],
+        "childEvidenceIncluded": false,
+        "workerSkillLoads": 0,
+        "totalTokens": 92677
+      },
+      "result": {
+        "schemaVersion": 1,
+        "evidenceType": "observed-delivery",
+        "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+        "id": "candidate-review-closure",
+        "side": "candidate",
+        "caseId": "review-closure",
+        "startedAt": "2026-09-07T08:43:48.661Z",
+        "finishedAt": "2026-09-07T08:44:54.087Z",
+        "elapsedMs": 65426,
+        "firstImplementationMs": null,
+        "postImplementationMs": null,
+        "metrics": {
+          "terminalState": "accepted",
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "firstImplementationAt": null,
+          "childDispatchCount": 0,
+          "reviewerDispatchCount": 0,
+          "validationExecutionCount": 0,
+          "validationReuseCount": null,
+          "broadCheckCount": 0,
+          "reviewFixCount": null,
+          "externalPollCount": 0
+        },
+        "runtime": {
+          "host": "OpenCode 1.18.20",
+          "model": "vertexflow/gpt-5.6-terra",
+          "reasoning": "xhigh"
+        },
+        "terminalState": "accepted",
+        "completed": true,
+        "changed": [],
+        "outOfScope": [],
+        "acceptance": {
+          "passed": true,
+          "exitCode": 0,
+          "error": null,
+          "output": ""
+        },
+        "runtimeArtifactExclusions": [
+          ".opencode/node_modules",
+          ".opencode/package.json",
+          ".opencode/package-lock.json",
+          ".opencode/.gitignore"
+        ],
+        "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+      },
+      "observed": {
+        "todoCalls": 3,
+        "childCalls": 0,
+        "protocolPaths": [
+          "references/classification.md",
+          "references/review.md",
+          "references/architect/review.md"
+        ],
+        "evidenceReused": true
+      }
+    }
+  ],
+  "limitations": [
+    "One sample per case per side; counterordered case pairs do not estimate provider variance.",
+    "Input tokens include provider reported cache/usage totals; not a billing measure.",
+    "Review starts from an already completed implementation with real evidence, not a timed multi-hour session.",
+    "Runtime artifacts are excluded by exact declared paths in the separate assessor; original assessor rejects host dependency symlinks.",
+    "No Track lifecycle or complete security-equivalence acceptance.",
+    "Only fixture final state and observed tools were checked; no host-enforced stopping guarantee."
+  ]
+}

@@ -1,6 +1,6 @@
 # Dev Harness
 
-Dev Harness is one agent skill for proportional software delivery. It classifies work as Quick, Scoped, or Track, applies bounded delegation and review, and includes a complete durable Architect lifecycle with automatic routing.
+Dev Harness is one agent skill for proportional software delivery. Quick and Scoped default to one current-session execution pass and local review. Track adds durable Architect coordination; substantial independent deliverables may use explicit child execution.
 
 ## Install
 
@@ -24,7 +24,8 @@ Restart your agent host after installation so it reloads the skill.
 - Main-session Coordinator and worker-session Executor boundaries
 - Runtime-aware delegation and model routing
 - Self-contained Work Orders and structured Executor Results
-- Bounded validation and review-fix cycles
+- Bounded validation with diagnostic repair checkpoints
+- Evidence-based technical recommendations and proportionate quality review
 - Built-in Architect Setup, Discuss, Propose, Implement, Review, and Status modules
 - Durable `architect/` context and Track artifacts without separate Architect Skill installs
 
@@ -36,52 +37,66 @@ Dev Harness includes a self-contained Discuss protocol for material requirements
 
 Use general brainstorming for standalone exploration. When the user asks to plan or implement a Track and a material decision is unresolved, Dev Harness enters Discuss. If the conversation already contains a brainstorming synthesis, Discuss treats confirmed decisions as evidence, asks only about remaining material gaps, and skips itself entirely when the direction is already established. It does not create a second discussion, Track artifact, or implementation contract for standalone exploration.
 
-## Child Model Configuration
+## Role Model Configuration
 
-Dev Harness never silently gives a child Agent the main Agent's model or reasoning depth. Before the first child dispatch, it asks for the child model, reasoning depth, and how widely to reuse the choice:
+Version 2 keeps `childAgent` for development and adds independent `coordinator` and `reviewerAgent` settings. Existing developer-only files remain valid; missing reviewer settings must never silently reuse the developer model. Reuse an explicit user choice without asking again.
 
-- **Current Session:** Every later Quick or Scoped child in the current Session reuses it. Track applies the stricter gate below.
-- **Current Project:** Every child in this project reuses it across future Sessions.
-- **Every Dispatch:** Ask again before each child; this occurs only when the user explicitly chooses it.
-
-Internal execution profiles are not user configuration boundaries. Switching between implementation and review, or between ordinary and deeper work, does not trigger another question when a Session or project choice already exists.
+The user-selected native Codex setup is also available as `templates/codex-project-config.json`:
 
 ```json
 {
   "version": 2,
-  "childAgent": {
-    "agent": "dev-harness-worker",
-    "model": "<host model id or alias>",
-    "reasoning": "<host reasoning depth or variant>"
-  }
+  "coordinator": {"model": "gpt-6-astra", "reasoning": "medium"},
+  "childAgent": {"model": "gpt-5.6-luna", "reasoning": "xhigh"},
+  "reviewerAgent": {"model": "gpt-5.6-sol", "reasoning": "high"}
 }
 ```
 
-Choosing `Current Project` explicitly authorizes this file write. A version 1 file containing profile-specific settings is treated as legacy: its values may be offered as candidates, but Dev Harness asks once for a unified choice rather than exposing profiles again.
+Store project choices in `.agents/dev-harness.json`. These are explicit choices, not universal model defaults. Validate exact names/efforts against the current host. The `coordinator` field records a preference; it does not switch an already running Codex session. Select the main model in the host and verify its actual setting before claiming it is active. No global config is changed by this skill.
 
-### Track Delegation Gate
+For native Codex, use `references/codex-dispatch.md` and `scripts/codex-dispatch.mjs`, with `role: "executor"` or `role: "reviewer"`. The helper emits `default`, explicit model/effort, `fork_turns: "none"`, and the appropriate instruction contract. Reviewer instructions are read-only; neither contract creates a host sandbox. A personal `luna-worker` role is not required.
 
-Every Track unit is executed by an explicitly configured child Executor. Before the first unit that the current Session executes for a Track is marked active, receives a Work Order, or edits a Track or implementation file, Dev Harness reads `.agents/dev-harness.json`. Only a valid version 2 `childAgent` configuration suppresses the question; a prior current-Session choice from Quick work, Scoped work, or another Track, a host default, or a main Session model does not.
+### Delivery Ownership
 
-When the local configuration is missing, legacy, incomplete, or unsupported, Dev Harness asks for the concrete model, reasoning value, and reuse scope, then pauses before any edit. If the runtime cannot create a child with that exact configuration, the Track is `blocked`; it never falls back to the Coordinator current Session.
+The main Coordinator owns decisions, integration and acceptance. A developer owns a complete coherent delivery batch through configuration/runtime changes, tests, documentation and in-scope repairs. Keep that developer for follow-ups; do not create another child for each filename, check command, configuration change or fix. The Coordinator may directly perform small bounded Track work when no active child owns those files. Delegation remains required when the user or a concrete safety/independence constraint requires it.
 
-For OpenCode hosts where `task` exposes only `subagent_type`, Dev Harness supports a project-local `.opencode/agents/dev-harness-worker.md` adapter. The Agent definition pins the configured model and `variant`; after an OpenCode restart, Dev Harness verifies those values and dispatches with `subagent_type: "dev-harness-worker"`. A generic inherited Agent or an OpenChamber Session does not satisfy the gate.
+Independent review uses `reviewerAgent` only when it adds value. It does not run after every small edit and cannot implement its own findings. Small local changes can receive Coordinator review.
+
+The Track Delegation Gate applies only to selected delegation. Missing or unsupported settings block that dispatch, not unrelated authorized local work. Do not silently replace a user-required child with the main session.
+
+OpenCode named Agents remain supported: `.opencode/agents/dev-harness-worker.md` may pin developer model/variant through `templates/opencode-worker.md`. A named reviewer needs its own verified read-only definition; do not dispatch Sol review through a Luna/other-model worker. Changing a named Agent requires host reload before claiming it is active.
 
 ## Automatic Routing
 
 ```text
 Request
-  -> Quick: one compact Work Order
-  -> Scoped: one bounded cross-module Work Order
+  -> Quick: compact checklist, current-session execution and review
+  -> Scoped: bounded current-session pass; delegate for a concrete reason
   -> Track:
        Setup if durable context is missing
        Discuss only when a material decision is unresolved
        Propose when scope is stable and no approved Track exists
-       Implement one approved plan unit at a time
-       Review every unit and the final Track
+       Gate -> Track runtime, approved coherent delivery batches
+       Review each coherent batch and genuine phase/final boundary
 ```
 
+## Completion And Measurement
+
+Ordinary short tasks reuse their compact checklist without an extra ledger or timing report. Repeated checks, review expansion, or a checkpoint load `references/delivery.md`: Quick checks progress after 15 minutes, Scoped after 45, and Track at planned phase checkpoints. Keep original acceptance and any explicit user hard limit across batches and repairs. These are diagnostic checkpoints, not automatic failure deadlines. Extra checks must resolve a named evidence gap; reuse valid evidence and stop when requested-tier evidence, required acceptance and review pass.
+
+Validation and hard-limit rules are Coordinator instructions, not host-enforced controls. The attestation verifier checks scoped baseline consistency; it does not enforce elapsed-time limits or replace host permissions.
+
+`node tests/eval/run-layered.mjs` checks static coverage and plans the input-cost microbenchmark. Its live mode returns fixed JSON without developing software, so it cannot establish delivery speed or behavioral safety. Use the delivery exercise workflow documented in `docs/delivery-evaluation.md` to measure actual edits, independently check acceptance, and compare recorded task outcomes. Never infer a speedup from a faster blocked task.
+
 Users do not choose between Dev Harness and Architect controllers. Dev Harness is the single controller, and Architect is its built-in durable lifecycle.
+
+## Technical Decisions For Product Owners
+
+The Coordinator takes responsibility for a justified technical recommendation and explains its business consequences. For a material stack/dependency choice, changed data/service boundary, or disputed engineering feedback, load `references/technical-quality.md`. Read the relevant project first, prefer existing patterns, compare only viable alternatives, and explain the evidence, maintenance cost, limitations, and conditions for revisiting the choice. Ask the user about business tradeoffs that actually need their decision; routine implementation choices stay with the Coordinator.
+
+Quality checks follow the affected behavior: permissions, important data, failure handling, deployment, and maintenance require relevant evidence when changed. Production and migration work names its requested completion tier, target environment, and minimum normal path; validate a thin target-runtime path early when that action is authorized. Vague criticism is translated into concrete impact, evidence, and a prioritized remedy under the existing review classes. Reviewers are strictly read-only; fixes belong to the existing developer or Coordinator-local owner. Passing local tests does not establish deployment, live acceptance, or business success.
+
+This adds no universal questionnaire, approval gate, architecture document, or reviewer child. Small edits and approved designs keep the lightweight path. Track reuses its Discuss/spec/Work Order records. Current route-byte benchmarks exclude this conditional pack unless explicitly loaded; real-host traces are needed to measure its cost and behavior. The protocol helps structure technical judgment; it does not certify architecture quality or replace a necessary specialist review.
 
 Legacy names such as `architect-discuss` and `architect-implement` remain accepted as intent aliases. Separately installed `architect-*` Skills are not required and should be removed to avoid duplicate triggers; existing project `architect/` artifacts remain compatible.
 

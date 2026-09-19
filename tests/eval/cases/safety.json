@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "worker-denies-nested-task",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "task",
+      "expected": "deny"
+    },
+    {
+      "id": "worker-denies-user-question",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "question",
+      "expected": "deny"
+    },
+    {
+      "id": "worker-denies-recursive-skill-load",
+      "type": "worker-permission",
+      "path": "templates/opencode-worker.md",
+      "permission": "skill",
+      "expected": "deny",
+      "knownBaselineFailure": true
+    },
+    {
+      "id": "track-gate-precedes-track-writes",
+      "type": "ordered-text",
+      "path": "references/orchestration.md",
+      "ordered": [
+        "## Track Delegation Gate",
+        "Before marking the first unit active, creating its Work Order, or editing any Track or implementation file:",
+        "Stop with the Track `blocked` state while that question is unanswered"
+      ]
+    },
+    {
+      "id": "review-remains-read-only",
+      "type": "contains-all",
+      "path": "references/review.md",
+      "includes": [
+        "Review is read-only by default.",
+        "The Coordinator decides which findings to fix."
+      ]
+    },
+    {
+      "id": "commit-requires-current-conversation-authorization",
+      "type": "contains-all",
+      "path": "references/architect/contracts.md",
+      "includes": [
+        "Any Git commit",
+        "Explicit commit request in the current conversation"
+      ]
+    },
+    {
+      "id": "unapproved-external-and-destructive-actions-stop",
+      "type": "contains-all",
+      "path": "references/execution.md",
+      "includes": [
+        "The next check is broad, destructive, externally consequential, credential-dependent, or long-running without authorization.",
+        "A significant dependency, architecture, public contract, migration, security, or data-model change is required but unapproved."
+      ]
+    }
+  ]
+}

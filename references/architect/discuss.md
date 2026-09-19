@@ -49,6 +49,8 @@ Each gate is `Passed`, `Needs input`, or `Deferred`, with pass mode `Explicit`, 
 
 ## Analysis Shape
 
+For material technical choices, apply `references/technical-quality.md` within this discussion. Recommend a justified option and translate consequences into business terms; reuse an established decision without starting another gate.
+
 1. Intake any earlier brainstorming synthesis or relevant conversation, then build shallow targeted context from Architect core, relevant Tracks, direct code/docs, APIs, schemas, and service boundaries.
 2. Stabilize problem, users, value, goals, non-goals, success, and affected domains.
 3. Split separable initiatives and identify one proposal-sized unit.
@@ -68,7 +70,7 @@ Use `templates/architect/discussion.md`. Remove contradictory assumptions, unres
 - A standalone exploration remains outside Architect and creates no Track, artifact, or implementation contract.
 - If the originating intent was discussion only, present the synthesis and stop.
 - If the user requested planning or implementation and the synthesis is ready, route automatically to `references/architect/propose.md` without asking which module to use.
-- Proposal still requires separate spec and plan approvals.
+- Proposal keeps spec and plan as separate schema-v1 artifacts. When approval is needed, present them with continuation mode in one concrete packet; a clear implementation request can cover routine in-scope records without a ceremonial mode choice.
 - A saved discussion draft is optional and never required for handoff.
 
 ## Stop Conditions

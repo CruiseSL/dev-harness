@@ -1,0 +1,901 @@
+{
+  "recordedAt": "2026-09-07T08:28:39.182536+00:00",
+  "runtime": {
+    "host": "OpenCode 1.18.20",
+    "model": "vertexflow/gpt-5.6-terra",
+    "reasoning": "xhigh"
+  },
+  "sources": {
+    "public": "9d88df9814e303046d7ff05e9cf42b31af2e10bb",
+    "previous": "/private/tmp/dev-harness-delivery-baseline/source",
+    "current": "/Users/a1/Documents/生龙的 AI 产品库/dev-harness"
+  },
+  "arms": {
+    "public": {
+      "quick-label": {
+        "summary": {
+          "id": "baseline-quick-label",
+          "elapsedMs": 62430,
+          "terminal": "accepted",
+          "final": "Harness: accepted.\n\nChanged `retryLabel` to `\"Retry\"` in [src/label.mjs](/private/tmp/dev-harness-effect-20260907-b/baseline-quick-label/src/label.mjs:1), preserving its export. `node test.mjs` passes; local diff review found only the owned one-line change and no blocking findings.",
+          "toolCalls": 19,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 7,
+          "commands": [
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff -- src/label.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 178758
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-quick-label",
+          "side": "baseline",
+          "caseId": "quick-label",
+          "startedAt": "2026-09-07T08:13:26.493Z",
+          "finishedAt": "2026-09-07T08:14:28.923Z",
+          "elapsedMs": 62430,
+          "firstImplementationMs": 38880,
+          "postImplementationMs": 23550,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:14:05.373Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/label.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "scoped-dry-run": {
+        "summary": {
+          "id": "baseline-scoped-dry-run",
+          "elapsedMs": 130839,
+          "terminal": "accepted",
+          "final": "Implemented dry-run support in [options.mjs](/private/tmp/dev-harness-effect-20260907-b/baseline-scoped-dry-run/src/options.mjs:1) and [deliver.mjs](/private/tmp/dev-harness-effect-20260907-b/baseline-scoped-dry-run/src/deliver.mjs:1).\n\n`--dry-run` now prevents sender invocation and returns `{ wouldSend: recipients.length }`; normal behavior remains `{ sent: recipients.length }`.\n\nReviewed only this two-file diff. No blocking findings. Validation passed: `node test.mjs` and `git diff --check`.",
+          "toolCalls": 30,
+          "focusedTests": 2,
+          "validationChecks": 4,
+          "edits": 1,
+          "protocolReads": 9,
+          "commands": [
+            {
+              "command": "git status --short && git diff -- src/options.mjs src/deliver.mjs && git log --oneline -10",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff -- src/options.mjs src/deliver.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/options.mjs src/deliver.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/options.mjs src/deliver.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": true,
+          "workerSkillLoads": 1,
+          "totalTokens": 184424
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-scoped-dry-run",
+          "side": "baseline",
+          "caseId": "scoped-dry-run",
+          "startedAt": "2026-09-07T08:17:05.097Z",
+          "finishedAt": "2026-09-07T08:19:15.936Z",
+          "elapsedMs": 130839,
+          "firstImplementationMs": 80242,
+          "postImplementationMs": 50597,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:18:25.339Z",
+            "childDispatchCount": 1,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 4,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/deliver.mjs",
+            "src/options.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "bounded-pagination": {
+        "summary": {
+          "id": "baseline-bounded-pagination",
+          "elapsedMs": 129279,
+          "terminal": "accepted",
+          "final": "Harness: accepted. `page` now returns `items.slice(offset, offset + limit)`, preserving the named export and leaving the input array unchanged.\n\nLocal review found no blocking issues; only `src/page.mjs` changed. Validation passed: `node test.mjs`.",
+          "toolCalls": 26,
+          "focusedTests": 2,
+          "validationChecks": 4,
+          "edits": 1,
+          "protocolReads": 8,
+          "commands": [
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/page.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/page.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": true,
+          "workerSkillLoads": 1,
+          "totalTokens": 222353
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-bounded-pagination",
+          "side": "baseline",
+          "caseId": "bounded-pagination",
+          "startedAt": "2026-09-07T08:19:15.987Z",
+          "finishedAt": "2026-09-07T08:21:25.266Z",
+          "elapsedMs": 129279,
+          "firstImplementationMs": 70687,
+          "postImplementationMs": 58592,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:20:26.674Z",
+            "childDispatchCount": 1,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 4,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/page.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      }
+    },
+    "previous": {
+      "quick-label": {
+        "summary": {
+          "id": "baseline-quick-label",
+          "elapsedMs": 74503,
+          "terminal": "accepted",
+          "final": "Harness: accepted. Updated [src/label.mjs](/private/tmp/dev-harness-effect-20260907-c/baseline-quick-label/src/label.mjs:1) so the exported retry label is `Retry`.\n\nValidation passed: `node test.mjs`. Local review found no blocking issues; only the owned file changed.",
+          "toolCalls": 14,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 4,
+          "commands": [
+            {
+              "command": "git diff -- src/label.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/label.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 168459
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-quick-label",
+          "side": "baseline",
+          "caseId": "quick-label",
+          "startedAt": "2026-09-07T08:23:29.901Z",
+          "finishedAt": "2026-09-07T08:24:44.404Z",
+          "elapsedMs": 74503,
+          "firstImplementationMs": 50924,
+          "postImplementationMs": 23579,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:24:20.825Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/label.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "scoped-dry-run": {
+        "summary": {
+          "id": "baseline-scoped-dry-run",
+          "elapsedMs": 58182,
+          "terminal": "accepted",
+          "final": "Implemented dry-run support in [src/options.mjs](/private/tmp/dev-harness-effect-20260907-c/baseline-scoped-dry-run/src/options.mjs:1) and [src/deliver.mjs](/private/tmp/dev-harness-effect-20260907-c/baseline-scoped-dry-run/src/deliver.mjs:1).\n\n`--dry-run` now returns `{wouldSend: recipients.length}` without invoking `sender`; normal delivery still returns `{sent: count}`.\n\nValidation: `node test.mjs` passed. Local review of only the two owned files found no blocking issues. No external send, dependency install, or commit was performed.",
+          "toolCalls": 14,
+          "focusedTests": 1,
+          "validationChecks": 3,
+          "edits": 1,
+          "protocolReads": 4,
+          "commands": [
+            {
+              "command": "git status --short && git diff -- src/options.mjs src/deliver.mjs && git diff --check",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/options.mjs src/deliver.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 126172
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-scoped-dry-run",
+          "side": "baseline",
+          "caseId": "scoped-dry-run",
+          "startedAt": "2026-09-07T08:24:44.453Z",
+          "finishedAt": "2026-09-07T08:25:42.635Z",
+          "elapsedMs": 58182,
+          "firstImplementationMs": 31825,
+          "postImplementationMs": 26357,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:25:16.278Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 3,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/deliver.mjs",
+            "src/options.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "bounded-pagination": {
+        "summary": {
+          "id": "baseline-bounded-pagination",
+          "elapsedMs": 57911,
+          "terminal": "accepted",
+          "final": "Harness: `accepted`.\n\nImplemented non-mutating pagination in [src/page.mjs](/private/tmp/dev-harness-effect-20260907-c/baseline-bounded-pagination/src/page.mjs:1) using `items.slice(offset, offset + limit)`.\n\nValidation passed: `node test.mjs`. Local review found no blocking issues; `git diff --check` passed. Only the owned path changed, with no fix cycles used.",
+          "toolCalls": 11,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 3,
+          "commands": [
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff -- src/page.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 84253
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "baseline-bounded-pagination",
+          "side": "baseline",
+          "caseId": "bounded-pagination",
+          "startedAt": "2026-09-07T08:25:42.686Z",
+          "finishedAt": "2026-09-07T08:26:40.597Z",
+          "elapsedMs": 57911,
+          "firstImplementationMs": 37063,
+          "postImplementationMs": 20848,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:26:19.749Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/page.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      }
+    },
+    "current": {
+      "quick-label": {
+        "summary": {
+          "id": "candidate-quick-label",
+          "elapsedMs": 45148,
+          "terminal": "accepted",
+          "final": "Accepted.\n\nChanged [src/label.mjs](/private/tmp/dev-harness-effect-20260907-b/candidate-quick-label/src/label.mjs:1) to export `retryLabel` as `\"Retry\"`.\n\nValidation passed: `node test.mjs`. Local review found no blocking issues; only the owned file changed.",
+          "toolCalls": 9,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 3,
+          "commands": [
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/label.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 95571
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "candidate-quick-label",
+          "side": "candidate",
+          "caseId": "quick-label",
+          "startedAt": "2026-09-07T08:14:52.666Z",
+          "finishedAt": "2026-09-07T08:15:37.814Z",
+          "elapsedMs": 45148,
+          "firstImplementationMs": 27037,
+          "postImplementationMs": 18111,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:15:19.703Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/label.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "scoped-dry-run": {
+        "summary": {
+          "id": "candidate-scoped-dry-run",
+          "elapsedMs": 87203,
+          "terminal": "accepted",
+          "final": "Harness: Quick - accepted.\n\n`parseArgs` now recognizes `--dry-run`; `deliver` returns `{ wouldSend: recipients.length }` without calling `sender`, while normal sends retain `{ sent: count }`.\n\nValidation passed: `node test.mjs`. Review found no blocking issues; only `src/options.mjs` and `src/deliver.mjs` changed.",
+          "toolCalls": 13,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 3,
+          "commands": [
+            {
+              "command": "git status --short && git diff -- src/options.mjs src/deliver.mjs && git diff --cached -- src/options.mjs src/deliver.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/options.mjs src/deliver.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 115707
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "candidate-scoped-dry-run",
+          "side": "candidate",
+          "caseId": "scoped-dry-run",
+          "startedAt": "2026-09-07T08:15:37.856Z",
+          "finishedAt": "2026-09-07T08:17:05.059Z",
+          "elapsedMs": 87203,
+          "firstImplementationMs": 48482,
+          "postImplementationMs": 38721,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:16:26.338Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/deliver.mjs",
+            "src/options.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      },
+      "bounded-pagination": {
+        "summary": {
+          "id": "candidate-bounded-pagination",
+          "elapsedMs": 103856,
+          "terminal": "accepted",
+          "final": "Harness: accepted. Updated [src/page.mjs](/private/tmp/dev-harness-effect-20260907-b/candidate-bounded-pagination/src/page.mjs:1) to return `items.slice(offset, offset + limit)` without mutation.\n\n`node test.mjs` passed. Local review found no blocking issues; only the owned file changed.",
+          "toolCalls": 14,
+          "focusedTests": 1,
+          "validationChecks": 2,
+          "edits": 1,
+          "protocolReads": 4,
+          "commands": [
+            {
+              "command": "git status --short",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "node test.mjs",
+              "status": "completed",
+              "exit": 0
+            },
+            {
+              "command": "git diff --check && git diff -- src/page.mjs && git status --short",
+              "status": "completed",
+              "exit": 0
+            }
+          ],
+          "toolErrors": [],
+          "childEvidenceIncluded": false,
+          "workerSkillLoads": 0,
+          "totalTokens": 176179
+        },
+        "result": {
+          "schemaVersion": 1,
+          "evidenceType": "observed-delivery",
+          "assessmentMode": "independent probe plus file fingerprints with declared host-artifact exclusions",
+          "id": "candidate-bounded-pagination",
+          "side": "candidate",
+          "caseId": "bounded-pagination",
+          "startedAt": "2026-09-07T08:21:25.311Z",
+          "finishedAt": "2026-09-07T08:23:09.167Z",
+          "elapsedMs": 103856,
+          "firstImplementationMs": 53835,
+          "postImplementationMs": 50021,
+          "metrics": {
+            "terminalState": "accepted",
+            "runtime": {
+              "host": "OpenCode 1.18.20",
+              "model": "vertexflow/gpt-5.6-terra",
+              "reasoning": "xhigh"
+            },
+            "firstImplementationAt": "2026-09-07T08:22:19.146Z",
+            "childDispatchCount": 0,
+            "reviewerDispatchCount": 0,
+            "validationExecutionCount": 2,
+            "validationReuseCount": null,
+            "broadCheckCount": 0,
+            "reviewFixCount": null,
+            "externalPollCount": 0
+          },
+          "runtime": {
+            "host": "OpenCode 1.18.20",
+            "model": "vertexflow/gpt-5.6-terra",
+            "reasoning": "xhigh"
+          },
+          "terminalState": "accepted",
+          "completed": true,
+          "changed": [
+            "src/page.mjs"
+          ],
+          "outOfScope": [],
+          "acceptance": {
+            "passed": true,
+            "exitCode": 0,
+            "error": null,
+            "output": ""
+          },
+          "runtimeArtifactExclusions": [
+            ".opencode/node_modules",
+            ".opencode/package.json",
+            ".opencode/package-lock.json",
+            ".opencode/.gitignore"
+          ],
+          "limitation": "OpenCode generated ignored SDK dependencies and symlinks. Original assessor rejects these; this separate assessment preserves raw fixtures and excludes only these named host paths. First implementation is the last successful edit before the first passing focused check. No Track or security equivalence claim."
+        }
+      }
+    }
+  },
+  "totals": {
+    "public": {
+      "elapsedMs": 322548,
+      "toolCalls": 75,
+      "focusedTests": 5,
+      "validationChecks": 10,
+      "reportedTokensIncludingCache": 585535,
+      "childDispatches": 2,
+      "completed": 3
+    },
+    "previous": {
+      "elapsedMs": 190596,
+      "toolCalls": 39,
+      "focusedTests": 3,
+      "validationChecks": 7,
+      "reportedTokensIncludingCache": 378884,
+      "childDispatches": 0,
+      "completed": 3
+    },
+    "current": {
+      "elapsedMs": 236207,
+      "toolCalls": 36,
+      "focusedTests": 3,
+      "validationChecks": 6,
+      "reportedTokensIncludingCache": 387457,
+      "childDispatches": 0,
+      "completed": 3
+    }
+  },
+  "rawEvidenceDirectories": [
+    "/private/tmp/dev-harness-effect-20260907-b",
+    "/private/tmp/dev-harness-effect-20260907-c"
+  ],
+  "excludedTrial": "/private/tmp/dev-harness-effect-20260907-a: stopped after wrong-directory reads; not part of comparison"
+}

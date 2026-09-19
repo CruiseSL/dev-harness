@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "measurement": "Declared initial-stage UTF-8 bytes. Track review/final stages are reported separately and included in fullDeliveryBytes. Conditional technical-quality and delivery packs are excluded unless declared in a route. Fixed-output live calls measure input cost only, not actual route execution. New native/local/reviewer routes are candidate-only observations; no frozen baseline speed or reduction comparison is available for them.",
+  "routes": [
+    {
+      "id": "explicit-status",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/architect/status.md", "references/architect/contracts.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "explicit-review-current-diff",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/architect/review.md", "references/review.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "quick-single-file-change",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/classification.md", "references/review.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "quick-unrelated-dirty-worktree",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/classification.md", "references/review.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "scoped-cross-module-change",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/classification.md", "references/review.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "scoped-no-explicit-child-selection",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/classification.md", "references/review.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "track-missing-child-configuration",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/architect/router.md", "references/architect/contracts.md", "references/track-gate.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "track-named-agent-mismatch",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/architect/router.md", "references/architect/contracts.md", "references/track-gate.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "track-matching-named-agent",
+      "dispatch": true,
+      "later": ["references/review.md", "references/architect/review.md"],
+      "coordinator": ["SKILL.md", "references/architect/router.md", "references/architect/contracts.md", "references/track-gate.md", "references/architect/track-runtime.md"],
+      "templates": ["templates/work-order.md", "templates/result.md"],
+      "worker": ["templates/opencode-worker.md"]
+    },
+    {
+      "id": "standalone-brainstorming",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/classification.md"],
+      "templates": [],
+      "worker": []
+    },
+    {
+      "id": "track-local-execution",
+      "dispatch": false,
+      "coordinator": ["SKILL.md", "references/architect/router.md", "references/architect/contracts.md", "references/track-gate.md", "references/architect/track-runtime.md"],
+      "templates": [],
+      "worker": [],
+      "later": ["references/review.md", "references/architect/review.md"]
+    },
+    {
+      "id": "track-native-executor",
+      "dispatch": true,
+      "coordinator": ["SKILL.md", "references/architect/router.md", "references/architect/contracts.md", "references/track-gate.md", "references/architect/track-runtime.md", "references/codex-dispatch.md"],
+      "templates": ["templates/work-order.md", "templates/result.md"],
+      "worker": ["templates/executor-contract.md"],
+      "later": ["references/review.md", "references/architect/review.md"]
+    },
+    {
+      "id": "local-independent-review",
+      "dispatch": true,
+      "coordinator": ["SKILL.md", "references/classification.md", "references/review.md", "references/codex-dispatch.md"],
+      "templates": [],
+      "worker": ["templates/reviewer-contract.md"]
+    }
+  ]
+}

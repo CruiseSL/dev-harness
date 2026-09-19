@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Turn one stable initiative into an approved and registered Track. Propose creates durable artifacts only after separate specification and plan approvals; it does not implement them.
+Turn one stable initiative into an approved and registered Track. Propose keeps `spec.md` and `plan.md` as separate schema-v1 artifacts, while presenting them with continuation mode in one concrete packet whenever approval is needed; it does not implement them.
 
 ## Preconditions
 
@@ -27,7 +27,7 @@ context_ready
   -> registered
 ```
 
-No management write occurs before `plan_approved`.
+No management write occurs before the combined packet is approved when approval is required. Clear implementation authorization may satisfy `plan_approved` for routine in-scope plan, registry, and metadata writes.
 
 ## Description And Type
 
@@ -39,7 +39,9 @@ Infer type unless it materially changes planning: `feature`, `bug`, `chore`, `re
 
 Draft from approved context using `templates/architect/spec.md`. Ask only about scope, behavior, constraints, validation, or definition of done that remains materially unknown.
 
-Present the full draft and request explicit `Approve` or `Revise`. Revise the full draft until approved. Spec approval authorizes planning only.
+Carry established technical recommendations, constraints, and decision-specific evidence from Discuss into the spec. If a material technical choice remains unresolved, use `references/technical-quality.md` through the existing Discuss route. Do not invent a new decision record or reopen an approved choice without new contradictory evidence.
+
+When approval is needed, present the full spec, plan outline, and continuation mode in one concrete packet and request `Approve` or `Revise`; revise until accepted. Keep spec and plan records distinct. Planning-only approval authorizes planning and Track records, not implementation. A clear implementation request with no unresolved material product choice covers routine in-scope records and implementation; it does not authorize consequential operations.
 
 ## Plan
 
@@ -54,15 +56,15 @@ Draft from the approved spec, `architect/workflow.md`, `templates/architect/plan
 
 - Parent tasks use `- [ ] Task: ...`.
 - Follow the selected grammar in `references/architect/contracts.md`.
-- Keep each status-managed unit suitable for one Work Order.
+- Group status-managed units by coherent outcome. A Work Order may cover adjacent units across configuration/runtime, tests, and documentation when the acceptance union remains within scope, one owner has no active collision, and authorization, rollout, and rollback boundaries are compatible.
 - Put tests before behavior changes when that is the repository pattern or meaningfully reduces risk.
 - End each phase with an Architect phase verification task when the delivery policy defines phase gates.
 
-Present the complete plan and request explicit `Approve` or `Revise`. Plan approval authorizes only the listed Track artifacts and registry updates.
+When approval is needed, present the complete plan with the spec and continuation mode and request `Approve` or `Revise`. Plan approval authorizes only the listed Track artifacts and registry updates; implementation remains limited to a clear implementation request or a later explicit authorization.
 
 ## Track Creation
 
-After both approvals:
+After the required packet approval, or after clear implementation authorization covers routine Track records:
 
 1. Generate `YYYYMMDD_shortname` and run full-ID, short-name, directory, and registry collision checks.
 2. Create missing management paths from `templates/architect/tracks.md` and add `templates/architect/management-section.md` to `architect/index.md` when absent.
@@ -75,7 +77,7 @@ Do not inspect unrelated Tracks for completeness or block an independent proposa
 
 ## Continuation
 
-Report created and updated files. If the originating intent included implementation, route to `references/architect/implement.md`; it will confirm the exact Track and implementation mode. Otherwise stop with the Track ready.
+Report created and updated files. If the originating intent included implementation, route through `references/track-gate.md` to `references/architect/track-runtime.md`; use Auto by default unless the user chose Manual or a mandated pause applies. Otherwise stop with the Track ready. Planning-only requests must stop before implementation.
 
 No commit occurs without an explicit commit request. Suggested message:
 
